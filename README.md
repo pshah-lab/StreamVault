@@ -1,20 +1,20 @@
-# StreamVault 🎬
+# StreamVault
 
 An end-to-end, enterprise streaming platform for chunking, securing, and streaming high-definition video over HTTP Live Streaming (HLS). Powered by **AWS CloudFront Signed Cookies**, **AWS Cognito**, **AWS Lambda**, **FFmpeg**, and a **Glassmorphic Web UI**.
 
 ---
 
-## 🌟 Key Features
+## Key Features
 
-- 🔐 **Token-Gated HLS Streaming**: Full security for `.m3u8` playlists and `.ts` media segments using CloudFront Signed Cookies (`SameSite=Lax`).
-- ⚡ **Automated On-Demand EC2 Pipeline**: Parallel FFmpeg encoding workers launched on EC2 (`c7i.2xlarge`) for fast video chunking.
-- 🎧 **Multi-Audio & Subtitle Support**: Dynamic audio track switching (Hindi, English, Telugu, Tamil, Malayalam, Kannada) and WebVTT subtitle selection inside `Hls.js`.
-- 📺 **Netflix-Style Glassmorphic UI**: 16:10 poster aspect ratio, vignette overlays, real-time debounced search, and responsive layout.
-- ⏯️ **Continue Watching Progress**: Persistent watch state synchronized across client `LocalStorage` and AWS DynamoDB.
+- **Token-Gated HLS Streaming**: Full security for `.m3u8` playlists and `.ts` media segments using CloudFront Signed Cookies (`SameSite=Lax`).
+- **Automated On-Demand EC2 Pipeline**: Parallel FFmpeg encoding workers launched on EC2 (`c7i.2xlarge`) for fast video chunking.
+- **Multi-Audio & Subtitle Support**: Dynamic audio track switching (Hindi, English, Telugu, Tamil, Malayalam, Kannada) and WebVTT subtitle selection inside `Hls.js`.
+- **Netflix-Style Glassmorphic UI**: 16:10 poster aspect ratio, vignette overlays, real-time debounced search, and responsive layout.
+- **Continue Watching Progress**: Persistent watch state synchronized across client `LocalStorage` and AWS DynamoDB.
 
 ---
 
-## 🏗️ System Architecture
+## System Architecture
 
 ```mermaid
 graph TD
@@ -39,7 +39,7 @@ graph TD
 
 ---
 
-## 🚀 Quick Start & Local Development
+## Quick Start & Local Development
 
 ### Prerequisites
 
@@ -67,7 +67,7 @@ pnpm build:infra
 
 ---
 
-## 🛠️ Deployment & Pipeline Usage
+## Deployment & Pipeline Usage
 
 ### 1. Deploy Infrastructure (AWS CDK)
 
@@ -76,7 +76,7 @@ pnpm build:infra
 bash infra/scripts/create-cloudfront-key-pair.sh
 
 # Deploy CDK Stack
-pnpm --dir infra cdk bootstrap aws://YOUR_ACCOUNT_ID/ap-south-1
+pnpm --dir infra cdk bootstrap aws://YOUR_ACCOUNT_ID/YOUR_AWS_REGION
 pnpm --dir infra cdk deploy \
   --parameters CognitoDomainPrefix=YOUR_COGNITO_DOMAIN_PREFIX \
   --parameters CloudFrontPublicKeyPem="$(cat .secrets/cloudfront/public.pem)"
@@ -92,7 +92,7 @@ This command automatically builds the web app (`web/dist`), syncs assets to `s3:
 
 ---
 
-## 🎬 Automated End-to-End Pipeline
+## Automated End-to-End Pipeline
 
 Process raw `.mp4`, `.mkv`, or `.mov` files from raw input to live streaming in a single command:
 
@@ -112,7 +112,7 @@ pnpm pipeline
 
 ---
 
-## 👤 Inviting Viewers
+## Inviting Viewers
 
 Create invite-only viewer accounts using AWS Cognito:
 
@@ -126,13 +126,6 @@ aws cognito-idp admin-create-user \
 
 ---
 
-## 📖 Project Documentation & SOP
-
-For full technical specifications, architectural decision records (ADRs), change history, and Standard Operating Procedures, see:
-👉 **[PROJECT_DOCUMENTATION_AND_SOP.md](docs/PROJECT_DOCUMENTATION_AND_SOP.md)**
-
----
-
-## 📄 License
+## License
 
 MIT License. See [LICENSE](LICENSE) for details.
