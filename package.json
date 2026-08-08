@@ -1,0 +1,28 @@
+{
+  "name": "stream-vault",
+  "version": "1.0.0",
+  "description": "Enterprise HLS streaming platform secured by AWS CloudFront Signed Cookies and Cognito.",
+  "main": "index.js",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "pnpm --dir services/auth test",
+    "chunk": "node src/chunkVideo.js",
+    "chunk:ec2": "bash scripts/launch-ec2-chunk-job.sh",
+    "upload:hls": "bash scripts/upload-hls.sh",
+    "upload:app": "bash scripts/upload-app.sh",
+    "deploy:web": "bash scripts/deploy-web.sh",
+    "pipeline": "bash scripts/pipeline.sh",
+    "build:web": "pnpm --dir web build",
+    "dev:web": "pnpm --dir web dev",
+    "build:infra": "pnpm --dir infra build",
+    "synth": "pnpm --dir infra cdk synth"
+  },
+  "keywords": ["hls", "video-streaming", "aws-cloudfront", "cognito", "ffmpeg", "typescript"],
+  "author": "Pratham Shah",
+  "license": "MIT",
+  "packageManager": "pnpm@10.29.3",
+  "dependencies": {
+    "ffmpeg-static": "^5.3.0"
+  }
+}

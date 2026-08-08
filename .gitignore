@@ -1,0 +1,14 @@
+node_modules/
+dist/
+cdk.out/
+.env
+.env.*
+.secrets/
+*.pem
+!*.public.pem
+output/
+stack-outputs.json
+
+# Internal documentation containing environment-specific AWS Account IDs & CloudFront IDs
+infra/import/README.md
+docs/

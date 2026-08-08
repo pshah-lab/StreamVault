@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/data:/app/data
+    environment:
+      - DATABASE_URL=sqlite:///./data/cinema.db
+      - JWT_SECRET=pratham-cinema-secure-key-1092
+    restart: always
+
+  frontend:
+    image: node:20-alpine
+    working_dir: /app
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+    environment:
+      - NODE_ENV=development
+    command: sh -c "npm install -g pnpm && pnpm install && pnpm --dir web dev --host --port 3000"
+    restart: always
+    depends_on:
+      - backend
