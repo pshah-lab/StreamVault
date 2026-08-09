@@ -18,16 +18,25 @@ export class VideoAuthStack extends cdk.Stack {
 
     const viewerDomain = new cdk.CfnParameter(this, "ViewerDomain", {
       type: "String",
-      default: "***REMOVED***.cloudfront.net",
       description: "Existing CloudFront distribution domain used for callbacks and signed-cookie scope.",
     });
     const cognitoDomainPrefix = new cdk.CfnParameter(this, "CognitoDomainPrefix", {
       type: "String",
-      description: "Globally unique Cognito Hosted UI domain prefix, for example pratham-hls-viewer-***REMOVED***.",
+      description: "Globally unique Cognito Hosted UI domain prefix, for example hls-viewer-prefix-123456789012.",
     });
     const cloudFrontPublicKeyPem = new cdk.CfnParameter(this, "CloudFrontPublicKeyPem", {
       type: "String",
       description: "PEM public key paired with the private key stored in Secrets Manager.",
+    });
+    const s3BucketName = new cdk.CfnParameter(this, "S3BucketName", {
+      type: "String",
+      default: "video-chunker-assets",
+      description: "Name of the S3 bucket storing input raw videos and HLS output playlists.",
+    });
+    const existingDistributionId = new cdk.CfnParameter(this, "ExistingDistributionId", {
+      type: "String",
+      default: "E1234567890ABC",
+      description: "Existing CloudFront Distribution ID.",
     });
 
     const userPool = new cognito.UserPool(this, "ViewerUserPool", {
@@ -132,11 +141,11 @@ export class VideoAuthStack extends cdk.Stack {
     });
     ec2WorkerRole.addToPolicy(new iam.PolicyStatement({
       actions: ["s3:GetObject"],
-      resources: ["arn:aws:s3:::***REMOVED***/input/*"],
+      resources: [`arn:aws:s3:::${s3BucketName.valueAsString}/input/*`],
     }));
     ec2WorkerRole.addToPolicy(new iam.PolicyStatement({
       actions: ["s3:ListBucket"],
-      resources: ["arn:aws:s3:::***REMOVED***"],
+      resources: [`arn:aws:s3:::${s3BucketName.valueAsString}`],
       conditions: {
         StringLike: {
           "s3:prefix": ["output*"],
@@ -145,11 +154,11 @@ export class VideoAuthStack extends cdk.Stack {
     }));
     ec2WorkerRole.addToPolicy(new iam.PolicyStatement({
       actions: ["s3:PutObject", "s3:DeleteObject"],
-      resources: ["arn:aws:s3:::***REMOVED***/output*/*"],
+      resources: [`arn:aws:s3:::${s3BucketName.valueAsString}/output*/*`],
     }));
     ec2WorkerRole.addToPolicy(new iam.PolicyStatement({
       actions: ["cloudfront:CreateInvalidation"],
-      resources: ["arn:aws:cloudfront::***REMOVED***:distribution/***REMOVED***"],
+      resources: [`arn:aws:cloudfront::${this.account}:distribution/${existingDistributionId.valueAsString}`],
     }));
     ec2WorkerRole.addToPolicy(new iam.PolicyStatement({
       actions: ["ec2:TerminateInstances"],
@@ -197,7 +206,7 @@ export class VideoAuthStack extends cdk.Stack {
     new cdk.CfnOutput(this, "Ec2WorkerInstanceProfileName", { value: "hls-video-chunker-ec2-worker" });
     new cdk.CfnOutput(this, "Ec2WorkerSubnetId", { value: ec2WorkerVpc.publicSubnets[0].subnetId });
     new cdk.CfnOutput(this, "Ec2WorkerSecurityGroupId", { value: ec2WorkerSecurityGroup.securityGroupId });
-    new cdk.CfnOutput(this, "ExistingDistributionIdOutput", { value: "***REMOVED***" });
+    new cdk.CfnOutput(this, "ExistingDistributionIdOutput", { value: existingDistributionId.valueAsString });
 
   }
 }

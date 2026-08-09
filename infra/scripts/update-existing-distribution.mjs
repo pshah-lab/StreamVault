@@ -14,14 +14,14 @@ const required = (name) => {
   if (!values[name]) throw new Error(`Missing ${name} in ${configPath}`);
   return values[name];
 };
-const distributionId = values.ExistingDistributionId ?? "***REMOVED***";
-const viewerDomain = values.ViewerDomain ?? "***REMOVED***.cloudfront.net";
+const distributionId = required("ExistingDistributionId");
+const viewerDomain = required("ViewerDomain");
 const client = new CloudFrontClient({});
 const current = await client.send(new GetDistributionConfigCommand({ Id: distributionId }));
 const config = current.DistributionConfig;
 if (!config || !current.ETag) throw new Error("Could not read distribution configuration.");
 
-const videoOriginId = values.ExistingVideoOriginId ?? "bahubali-output";
+const videoOriginId = values.ExistingVideoOriginId ?? config.Origins?.Items?.[0]?.Id;
 const videoOrigin = config.Origins?.Items?.find((origin) => origin.Id === videoOriginId);
 if (!videoOrigin) throw new Error(`Video origin ${videoOriginId} was not found. No changes were made.`);
 const origins = config.Origins?.Items ?? [];

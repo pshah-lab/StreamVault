@@ -13,7 +13,10 @@ OUTPUT_PREFIX="${4:-output}"
 REGION="${AWS_REGION:-ap-south-1}"
 INSTANCE_TYPE="${EC2_INSTANCE_TYPE:-c7i.2xlarge}"
 INSTANCE_PROFILE_NAME="${EC2_INSTANCE_PROFILE_NAME:-hls-video-chunker-ec2-worker}"
-DISTRIBUTION_ID="${CLOUDFRONT_DISTRIBUTION_ID:-***REMOVED***}"
+DISTRIBUTION_ID="${CLOUDFRONT_DISTRIBUTION_ID:-}"
+if [[ -z "$DISTRIBUTION_ID" && -f stack-outputs.json ]]; then
+  DISTRIBUTION_ID="$(node -e 'try { const o=JSON.parse(require("fs").readFileSync("stack-outputs.json")); console.log(o.ExistingDistributionId || o.ExistingDistributionIdOutput || ""); } catch(e){}' 2>/dev/null || true)"
+fi
 AMI_PARAMETER="${EC2_AMI_PARAMETER:-/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64}"
 SUBNET_ID="${EC2_SUBNET_ID:-}"
 SECURITY_GROUP_ID="${EC2_SECURITY_GROUP_ID:-}"
@@ -21,7 +24,7 @@ VOLUME_SIZE_GB="${EC2_VOLUME_SIZE_GB:-120}"
 
 if [[ -z "$BUCKET" || -z "$INPUT_KEY_OR_URI" || -z "$HLS_NAME" ]]; then
   echo "Usage: pnpm chunk:ec2 -- <bucket-name> <input-key-or-s3-uri> <hls-name> [output-prefix]"
-  echo "Example: AWS_PROFILE=reactUser pnpm chunk:ec2 -- ***REMOVED*** input/bahubali-part-1.mp4 bahubali-part-1 output"
+  echo "Example: AWS_PROFILE=myProfile pnpm chunk:ec2 -- my-s3-bucket input/my-video.mp4 my-video output"
   exit 1
 fi
 

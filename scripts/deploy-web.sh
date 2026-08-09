@@ -12,7 +12,7 @@
 #
 # Environment overrides:
 #   AWS_PROFILE           AWS credential profile (default: reactUser)
-#   BUCKET                S3 bucket name         (default: ***REMOVED***)
+#   BUCKET                S3 bucket name         (default: your-s3-bucket-name)
 #   DISTRIBUTION_ID       CloudFront dist ID     (read from stack-outputs.json)
 #   SKIP_BUILD            set to 1 to skip the build step
 #   SKIP_INVALIDATION     set to 1 to skip CloudFront invalidation
@@ -26,17 +26,25 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 cd "$PROJECT_ROOT"
 
 # ── Configuration ──
-export AWS_PROFILE="${AWS_PROFILE:-reactUser}"
-BUCKET="${1:-${BUCKET:-***REMOVED***}}"
+export AWS_PROFILE="${AWS_PROFILE:-default}"
+BUCKET="${1:-${BUCKET:-your-s3-bucket-name}}"
 DIST_DIR="web/dist"
 
 # Read CloudFront distribution ID from stack-outputs.json if not overridden
 if [[ -z "${DISTRIBUTION_ID:-}" ]]; then
   if [[ -f stack-outputs.json ]]; then
-    DISTRIBUTION_ID="$(node -e "console.log(require('./stack-outputs.json').ExistingDistributionId)")"
+    DISTRIBUTION_ID="$(node -e 'const o=JSON.parse(require("fs").readFileSync("stack-outputs.json")); console.log(o.ExistingDistributionId || o.ExistingDistributionIdOutput || "")')"
   else
     echo "Error: stack-outputs.json not found and DISTRIBUTION_ID not set."
     exit 1
+  fi
+fi
+
+VIEWER_DOMAIN="${VIEWER_DOMAIN:-your-cloudfront-domain.cloudfront.net}"
+if [[ -f stack-outputs.json ]]; then
+  STACK_DOMAIN="$(node -e 'try { const o=JSON.parse(require("fs").readFileSync("stack-outputs.json")); console.log(o.ViewerDomain || ""); } catch(e){}' 2>/dev/null || true)"
+  if [[ -n "$STACK_DOMAIN" ]]; then
+    VIEWER_DOMAIN="$STACK_DOMAIN"
   fi
 fi
 
@@ -115,6 +123,6 @@ fi
 echo ""
 echo "═══════════════════════════════════════════════════════════════"
 echo "  🎬 Deployed! View at:"
-echo "  https://***REMOVED***.cloudfront.net/app/index.html"
+echo "  https://${VIEWER_DOMAIN}/app/index.html"
 echo "═══════════════════════════════════════════════════════════════"
 echo ""

@@ -13,7 +13,7 @@
 #
 # Environment overrides:
 #   AWS_PROFILE           (default: reactUser)
-#   BUCKET                (default: ***REMOVED***)
+#   BUCKET                (default: your-s3-bucket-name)
 #   OUTPUT_BASE           (default: output)  — S3 prefix root for HLS output
 #   EC2_POLL_INTERVAL     (default: 60)      — seconds between EC2 state polls
 #   EC2_TIMEOUT_MINUTES   (default: 60)      — max minutes to wait per instance
@@ -27,8 +27,8 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 cd "$PROJECT_ROOT"
 
 # ── Configuration ──
-export AWS_PROFILE="${AWS_PROFILE:-reactUser}"
-BUCKET="${BUCKET:-***REMOVED***}"
+export AWS_PROFILE="${AWS_PROFILE:-default}"
+BUCKET="${BUCKET:-your-s3-bucket-name}"
 REGION="${AWS_REGION:-ap-south-1}"
 OUTPUT_BASE="${OUTPUT_BASE:-output}"
 EC2_POLL_INTERVAL="${EC2_POLL_INTERVAL:-60}"
@@ -595,11 +595,13 @@ done
 # Done!
 # ──────────────────────────────────────────────────────────────────────────────
 
-echo "═══════════════════════════════════════════════════════════════"
-echo "  🎬 Pipeline complete!"
-echo ""
-echo "  Processed $NUM_VIDEOS video(s)."
-echo ""
-echo "  Viewer: https://***REMOVED***.cloudfront.net/app/index.html"
+VIEWER_DOMAIN="${VIEWER_DOMAIN:-your-cloudfront-domain.cloudfront.net}"
+if [[ -f stack-outputs.json ]]; then
+  STACK_DOMAIN="$(node -e 'try { const o=JSON.parse(require("fs").readFileSync("stack-outputs.json")); console.log(o.ViewerDomain || ""); } catch(e){}' 2>/dev/null || true)"
+  if [[ -n "$STACK_DOMAIN" ]]; then
+    VIEWER_DOMAIN="$STACK_DOMAIN"
+  fi
+fi
+echo "  Viewer: https://${VIEWER_DOMAIN}/app/index.html"
 echo "═══════════════════════════════════════════════════════════════"
 echo ""

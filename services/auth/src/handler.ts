@@ -24,21 +24,23 @@ const authCallback = `https://${config.viewerDomain}/auth/callback`;
 const appUrl = `https://${config.viewerDomain}/app/index.html`;
 const verifier = CognitoJwtVerifier.create({ userPoolId: config.userPoolId, clientId: config.clientId, tokenUse: "id" });
 
-const SECURITY_HEADERS = {
-  "cache-control": "no-store",
-  "strict-transport-security": "max-age=63072000; includeSubDomains; preload",
-  "x-frame-options": "DENY",
-  "x-content-type-options": "nosniff",
-  "referrer-policy": "strict-origin-when-cross-origin",
-  "content-security-policy": "default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; media-src 'self' blob: https://***REMOVED***.cloudfront.net; img-src 'self' data:; connect-src 'self' https://***REMOVED***.cloudfront.net http://localhost:8000;"
-};
+function getSecurityHeaders() {
+  return {
+    "cache-control": "no-store",
+    "strict-transport-security": "max-age=63072000; includeSubDomains; preload",
+    "x-frame-options": "DENY",
+    "x-content-type-options": "nosniff",
+    "referrer-policy": "strict-origin-when-cross-origin",
+    "content-security-policy": `default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; media-src 'self' blob: https://${config.viewerDomain}; img-src 'self' data:; connect-src 'self' https://${config.viewerDomain} http://localhost:8000;`,
+  };
+}
 
 function redirect(location: string, cookies: string[] = []): APIGatewayProxyResultV2 {
   return {
     statusCode: 302,
     headers: {
       location,
-      ...SECURITY_HEADERS,
+      ...getSecurityHeaders(),
     },
     cookies,
   };

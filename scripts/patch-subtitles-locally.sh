@@ -3,8 +3,8 @@
 
 set -euo pipefail
 
-BUCKET="***REMOVED***"
-REGION="ap-south-1"
+BUCKET="${BUCKET:-your-s3-bucket-name}"
+REGION="${AWS_REGION:-ap-south-1}"
 CATALOG="movies.json"
 
 read -rp "Local video file path: " VIDEO_PATH
