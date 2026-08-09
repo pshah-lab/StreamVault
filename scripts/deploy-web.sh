@@ -26,8 +26,11 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 cd "$PROJECT_ROOT"
 
 # ── Configuration ──
-export AWS_PROFILE="${AWS_PROFILE:-default}"
-BUCKET="${1:-${BUCKET:-your-s3-bucket-name}}"
+export AWS_PROFILE="${AWS_PROFILE:-reactUser}"
+if [[ -z "${BUCKET:-}" ]] && [[ -f stack-outputs.json ]]; then
+  BUCKET="$(node -e 'try { const o=JSON.parse(require("fs").readFileSync("stack-outputs.json")); console.log(o.BucketName || o.Bucket || ""); } catch(e){}' 2>/dev/null || true)"
+fi
+BUCKET="${1:-${BUCKET:-***REMOVED***}}"
 DIST_DIR="web/dist"
 
 # Read CloudFront distribution ID from stack-outputs.json if not overridden
