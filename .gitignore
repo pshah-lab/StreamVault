@@ -4,6 +4,7 @@ cdk.out/
 cdk.context.json
 .env
 .env.*
+!.env.example
 .secrets/
 *.pem
 !*.public.pem

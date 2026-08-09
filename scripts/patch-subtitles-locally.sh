@@ -3,6 +3,14 @@
 
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+if [[ -f "$PROJECT_ROOT/.env" ]]; then
+  set -o allexport
+  source "$PROJECT_ROOT/.env"
+  set +o allexport
+fi
+
 BUCKET="${BUCKET:-your-s3-bucket-name}"
 REGION="${AWS_REGION:-ap-south-1}"
 CATALOG="movies.json"

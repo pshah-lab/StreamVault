@@ -10,6 +10,14 @@ INPUT_KEY_OR_URI="${2:-}"
 HLS_NAME="${3:-}"
 OUTPUT_PREFIX="${4:-output}"
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+if [[ -f "$PROJECT_ROOT/.env" ]]; then
+  set -o allexport
+  source "$PROJECT_ROOT/.env"
+  set +o allexport
+fi
+
 REGION="${AWS_REGION:-ap-south-1}"
 INSTANCE_TYPE="${EC2_INSTANCE_TYPE:-c7i.2xlarge}"
 INSTANCE_PROFILE_NAME="${EC2_INSTANCE_PROFILE_NAME:-hls-video-chunker-ec2-worker}"

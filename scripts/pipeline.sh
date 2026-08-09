@@ -27,12 +27,18 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 cd "$PROJECT_ROOT"
 
 # ── Configuration ──
-export AWS_PROFILE="${AWS_PROFILE:-reactUser}"
+if [[ -f "$PROJECT_ROOT/.env" ]]; then
+  set -o allexport
+  source "$PROJECT_ROOT/.env"
+  set +o allexport
+fi
+
+export AWS_PROFILE="${AWS_PROFILE:-default}"
 if [[ -z "${BUCKET:-}" ]] && [[ -f stack-outputs.json ]]; then
   BUCKET="$(node -e 'try { const o=JSON.parse(require("fs").readFileSync("stack-outputs.json")); console.log(o.BucketName || o.Bucket || ""); } catch(e){}' 2>/dev/null || true)"
 fi
-BUCKET="${BUCKET:-***REMOVED***}"
-REGION="${AWS_REGION:-ap-south-1}"
+BUCKET="${BUCKET:-your-s3-bucket-name}"
+REGION="${AWS_REGION:-us-east-1}"
 OUTPUT_BASE="${OUTPUT_BASE:-output}"
 EC2_POLL_INTERVAL="${EC2_POLL_INTERVAL:-60}"
 EC2_TIMEOUT_MINUTES="${EC2_TIMEOUT_MINUTES:-60}"
