@@ -1,0 +1,153 @@
+[
+  {
+    "id": "bahubali-the-beginning",
+    "title": "Baahubali",
+    "subtitle": "The Beginning",
+    "year": 2015,
+    "hlsName": "bahubali-the-beginning",
+    "outputPrefix": "output/bahubali-the-beginning",
+    "sourceFile": "input/bahubali-the-beginning.mp4",
+    "poster": "posters/bahubali-the-beginning.jpg"
+  },
+  {
+    "id": "bahubali-the-conclusion",
+    "title": "Baahubali",
+    "subtitle": "The Conclusion",
+    "year": 2017,
+    "hlsName": "bahubali-the-conclusion",
+    "outputPrefix": "output/bahubali-the-conclusion",
+    "sourceFile": "input/bahubali-the-conclusion.mp4",
+    "poster": "posters/bahubali-the-conclusion.jpg"
+  },
+  {
+    "id": "mahavtar-narsimha",
+    "title": "Mahavtar Narsimha",
+    "subtitle": "",
+    "year": 2024,
+    "hlsName": "mahavtar-narsimha",
+    "outputPrefix": "output/mahavtar-narsimha",
+    "sourceFile": "input/www.5MovieRulz.clinic - Mahavatar Narsimha (2025) 1080p HQ WEB-DL - AVC - (DD+ 5.1 - 640kbps & AAC) [Tel + Tam + Hin + Mal + Kan] - 7.4GB - ESub.mkv",
+    "multiAudio": true,
+    "poster": "posters/mahavtar-narsimha.jpg"
+  },
+  {
+    "id": "harry-potter-sorcerers-stone",
+    "title": "Harry Potter and the Sorcerers Stone",
+    "subtitle": "",
+    "year": 2001,
+    "hlsName": "harry-potter-sorcerers-stone",
+    "outputPrefix": "output/harry-potter-sorcerers-stone",
+    "sourceFile": "input/Harry Potter and the Sorcerers Stone (2001) Dual Audio {HindiEnglish} 1080p BluRay 2.8GB ESub [BollYFlix].mkv",
+    "multiAudio": true,
+    "subtitles": true,
+    "poster": "posters/harry-potter-sorcerers-stone.jpg"
+  },
+  {
+    "id": "harry-potter-and-the-half-blood-prince",
+    "title": "Harry Potter And The Half Blood Prince",
+    "subtitle": "",
+    "year": 2009,
+    "hlsName": "harry-potter-and-the-half-blood-prince",
+    "outputPrefix": "output/harry-potter-and-the-half-blood-prince",
+    "sourceFile": "input/Harry Potter And The Half Blood Prince (2009) Dual Audio {HindiEnglish} 1080p BluRay 3GB ESub [BollYFlix].mkv",
+    "multiAudio": true,
+    "subtitles": true,
+    "poster": "posters/harry-potter-and-the-half-blood-prince.jpg"
+  },
+  {
+    "id": "harry-potter-and-the-chamber-of-secrets",
+    "title": "Harry Potter and the Chamber of Secrets",
+    "subtitle": "",
+    "year": 2002,
+    "hlsName": "harry-potter-and-the-chamber-of-secrets",
+    "outputPrefix": "output/harry-potter-and-the-chamber-of-secrets",
+    "sourceFile": "input/Harry Potter and the Chamber of Secrets (2002) Dual Audio {HindiEnglish} 1080p BluRay 3.1GB ESub [BollYFlix].mkv",
+    "multiAudio": true,
+    "subtitles": true,
+    "poster": "posters/harry-potter-and-the-chamber-of-secrets.jpg"
+  },
+  {
+    "id": "harry-potter-and-the-deathly-hallows-part-1",
+    "title": "Harry Potter and the Deathly Hallows Part 1",
+    "subtitle": "",
+    "year": 2010,
+    "hlsName": "harry-potter-and-the-deathly-hallows-part-1",
+    "outputPrefix": "output/harry-potter-and-the-deathly-hallows-part-1",
+    "sourceFile": "input/Harry Potter and the Deathly Hallows Part 1 (2010) Dual Audio {HindiEnglish} 1080p BluRay 2.8GB ESub [BollYFlix].mkv",
+    "multiAudio": true,
+    "subtitles": true,
+    "poster": "posters/harry-potter-and-the-deathly-hallows-part-1.jpg"
+  },
+  {
+    "id": "harry-potter-and-the-deathly-hallows-part-2",
+    "title": "Harry Potter and the Deathly Hallows Part 2",
+    "subtitle": "",
+    "year": 2011,
+    "hlsName": "harry-potter-and-the-deathly-hallows-part-2",
+    "outputPrefix": "output/harry-potter-and-the-deathly-hallows-part-2",
+    "sourceFile": "input/Harry Potter and the Deathly Hallows Part 2 (2011) Dual Audio {HindiEnglish} 1080p BluRay 2.6GB ESub [BollYFlix].mkv",
+    "multiAudio": true,
+    "subtitles": true,
+    "poster": "posters/harry-potter-and-the-deathly-hallows-part-2.jpg"
+  },
+  {
+    "id": "harry-potter-and-the-goblet-of-fire",
+    "title": "Harry Potter and the Goblet of Fire",
+    "subtitle": "",
+    "year": 2005,
+    "hlsName": "harry-potter-and-the-goblet-of-fire",
+    "outputPrefix": "output/harry-potter-and-the-goblet-of-fire",
+    "sourceFile": "input/Harry Potter and the Goblet of Fire (2005) Dual Audio {HindiEnglish} 1080p BluRay 3GB ESub [BollYFlix].mkv",
+    "multiAudio": true,
+    "subtitles": true,
+    "poster": "posters/harry-potter-and-the-goblet-of-fire.jpg"
+  },
+  {
+    "id": "harry-potter-and-the-order-of-the-phoenix",
+    "title": "Harry Potter and the Order of the Phoenix",
+    "subtitle": "",
+    "year": 2007,
+    "hlsName": "harry-potter-and-the-order-of-the-phoenix",
+    "outputPrefix": "output/harry-potter-and-the-order-of-the-phoenix",
+    "sourceFile": "input/Harry Potter and the Order of the Phoenix (2007) Dual Audio {HindiEnglish} 1080p BluRay 2.6GB ESub [BollYFlix].mkv",
+    "multiAudio": true,
+    "subtitles": true,
+    "poster": "posters/harry-potter-and-the-order-of-the-phoenix.jpg"
+  },
+  {
+    "id": "voicemails-for-isabelle",
+    "title": "Voicemails for Isabelle",
+    "subtitle": "",
+    "year": 2026,
+    "hlsName": "voicemails-for-isabelle",
+    "outputPrefix": "output/voicemails-for-isabelle",
+    "sourceFile": "input/Voicemails for Isabelle 2026 1080p NF WEB-DL DDP5 1 Atmos H 264-FLUX.mkv",
+    "multiAudio": true,
+    "subtitles": true,
+    "poster": "posters/voicemails-for-isabelle.jpg"
+  },
+  {
+    "id": "harry-potter-and-the-prisoner-of-azkaban",
+    "title": "Harry Potter and the Prisoner of Azkaban",
+    "subtitle": "",
+    "year": 2004,
+    "hlsName": "harry-potter-and-the-prisoner-of-azkaban",
+    "outputPrefix": "output/harry-potter-and-the-prisoner-of-azkaban",
+    "sourceFile": "input/Harry Potter and the Prisoner of Azkaban (2004) Dual Audio {HindiEnglish} 1080p BluRay 2.8GB ESub.mkv",
+    "multiAudio": true,
+    "subtitles": true,
+    "poster": "posters/harry-potter-and-the-prisoner-of-azkaban.jpg"
+  },
+  {
+    "id": "gifted",
+    "title": "Gifted",
+    "subtitle": "",
+    "year": 2017,
+    "hlsName": "gifted",
+    "outputPrefix": "output/gifted",
+    "sourceFile": "input/Gifted.2017.1080p.BluRay.x264.VPPV.mkv",
+    "multiAudio": false,
+    "subtitles": false,
+    "poster": "posters/gifted.jpg"
+  }
+]
