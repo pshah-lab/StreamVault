@@ -1,0 +1,20 @@
+{
+  "name": "@hls-video-chunker/auth",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@aws-sdk/client-secrets-manager": "^3.840.0",
+    "@aws-sdk/cloudfront-signer": "^3.840.0",
+    "aws-jwt-verify": "^5.1.1"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.152",
+    "@types/node": "^24.0.0",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
+  }
+}
