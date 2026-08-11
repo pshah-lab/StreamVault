@@ -396,6 +396,10 @@ let lastSavedTime = 0;
 let lastSavedMovieId = "";
 
 video.addEventListener("timeupdate", () => {
+  if (!video.paused && video.currentTime > 0 && !errorPanel.hidden) {
+    hideAccessError();
+  }
+
   const currentTime = video.currentTime;
   if (!activeMovie) return;
 
@@ -444,20 +448,29 @@ async function loadPlayer(movie: Movie) {
     });
 
     hls.on(Hls.Events.ERROR, (_event, data) => {
-      if (!data.fatal) return;
-      if (data.response?.code === 403) {
-        showAccessError("Your session token has expired. Please sign in again.", "Access Denied (403)");
-        return;
-      }
+      console.warn("HLS event note:", data);
+
       if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
         hls.recoverMediaError();
         return;
       }
+
       if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
+        if (data.response?.code === 403) {
+          if (!video.paused && video.currentTime > 0) {
+            // Video is actively playing, ignore background 403 check
+            return;
+          }
+          showAccessError("Your session token has expired. Please sign in again.", "Access Denied (403)");
+          return;
+        }
         hls.startLoad();
         return;
       }
-      showAccessError(`Playback error: ${data.details}`);
+
+      if (data.fatal && (video.paused || video.currentTime === 0)) {
+        showAccessError(`Playback error: ${data.details}`);
+      }
     });
     return;
   }
