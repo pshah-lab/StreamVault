@@ -118,7 +118,8 @@ async function callback(event: APIGatewayProxyEventV2) {
 }
 
 function logout() {
-  const params = new URLSearchParams({ client_id: config.clientId, logout_uri: appUrl });
+  const loginPageUrl = `https://${config.viewerDomain}/app/login.html`;
+  const params = new URLSearchParams({ client_id: config.clientId, logout_uri: loginPageUrl });
   const clear = ["CloudFront-Policy", "CloudFront-Signature", "CloudFront-Key-Pair-Id", "auth_state"].map((name) => securityCookie(name, "", 0, name === "auth_state" ? "/auth" : "/", name === "auth_state" ? "Lax" : "Strict"));
   return redirect(`https://${config.cognitoDomain}/logout?${params}`, clear);
 }
