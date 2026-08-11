@@ -40,7 +40,7 @@ export class VideoAuthStack extends cdk.Stack {
     });
 
     const userPool = new cognito.UserPool(this, "ViewerUserPool", {
-      userPoolName: "pratham-hls-viewers",
+      userPoolName: "streamvault-viewers",
       selfSignUpEnabled: false,
       signInAliases: { email: true },
       autoVerify: { email: true },
@@ -50,7 +50,7 @@ export class VideoAuthStack extends cdk.Stack {
     });
 
     const userPoolClient = userPool.addClient("HostedUiClient", {
-      userPoolClientName: "pratham-hls-hosted-ui",
+      userPoolClientName: "streamvault-hosted-ui",
       generateSecret: false,
       oAuth: {
         flows: { authorizationCodeGrant: true },
@@ -79,13 +79,13 @@ export class VideoAuthStack extends cdk.Stack {
     const publicKey = new cloudfront.CfnPublicKey(this, "ViewerSigningPublicKey", {
       publicKeyConfig: {
         callerReference: `${this.stackName}-viewer-signing-key`,
-        name: "pratham-hls-viewer-signing-key",
+        name: "streamvault-viewer-signing-key",
         encodedKey: cloudFrontPublicKeyPem.valueAsString,
       },
     });
     const keyGroup = new cloudfront.CfnKeyGroup(this, "ViewerSigningKeyGroup", {
       keyGroupConfig: {
-        name: "pratham-hls-viewers",
+        name: "streamvault-viewers",
         items: [publicKey.ref],
       },
     });
@@ -176,13 +176,13 @@ export class VideoAuthStack extends cdk.Stack {
     });
 
     const authApi = new apigwv2.HttpApi(this, "AuthApi", {
-      apiName: "pratham-hls-auth",
+      apiName: "streamvault-auth",
       createDefaultStage: true,
     });
     authApi.addRoutes({ path: "/auth/{proxy+}", methods: [apigwv2.HttpMethod.GET], integration: new apigwv2Integrations.HttpLambdaIntegration("AuthIntegration", authHandler) });
 
     const playbackTable = new dynamodb.Table(this, "PlaybackProgressTable", {
-      tableName: "PrathamCinemaPlayback",
+      tableName: "StreamVaultPlayback",
       partitionKey: { name: "user_id", type: dynamodb.AttributeType.STRING },
       sortKey: { name: "movie_id", type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,

@@ -12,7 +12,7 @@
 #   pnpm pipeline -- --force         # reprocess ALL videos in input/
 #
 # Environment overrides:
-#   AWS_PROFILE           (default: reactUser)
+#   AWS_PROFILE           (loaded from .env)
 #   BUCKET                (default: your-s3-bucket-name)
 #   OUTPUT_BASE           (default: output)  — S3 prefix root for HLS output
 #   EC2_POLL_INTERVAL     (default: 60)      — seconds between EC2 state polls
@@ -63,7 +63,6 @@ else
 fi
 
 # Fetch EC2 subnet and security group from CloudFormation stack outputs
-# (required because ap-south-1 has no default VPC)
 if [[ -z "${EC2_SUBNET_ID:-}" || -z "${EC2_SECURITY_GROUP_ID:-}" ]]; then
   echo "Fetching EC2 network config from CloudFormation..."
   CFN_OUTPUTS="$(aws cloudformation describe-stacks \
@@ -95,7 +94,7 @@ export EC2_SUBNET_ID EC2_SECURITY_GROUP_ID
 
 echo ""
 echo "╔══════════════════════════════════════════════════════════════╗"
-echo "║          Pratham Cinema — End-to-End Pipeline               ║"
+echo "║          StreamVault — End-to-End Pipeline                  ║"
 echo "╚══════════════════════════════════════════════════════════════╝"
 echo ""
 echo "  Profile:       $AWS_PROFILE"
@@ -276,7 +275,7 @@ for video_path in "${NEW_VIDEOS[@]}"; do
   # Clean up common tags from filename before deriving HLS name
   clean_name="$name_no_ext"
   clean_name=$(echo "$clean_name" | sed -E 's/\([0-9]{4}\).*//')
-  clean_name=$(echo "$clean_name" | sed -E 's/(Dual Audio|1080p|720p|BluRay|BRRip|HDRip|WEBRip|WEB-DL|ESub|BollYFlix|\{|\[).*//I')
+  clean_name=$(echo "$clean_name" | sed -E 's/(Dual Audio|1080p|720p|BluRay|BRRip|HDRip|WEBRip|WEB-DL|ESub|\{|\[).*//I')
   clean_name=$(echo "$clean_name" | sed -E 's/[[:space:]_-]+$//')
 
   # Derive a URL-safe HLS name from the filename

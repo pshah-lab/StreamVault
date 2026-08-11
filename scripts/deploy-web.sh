@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # ──────────────────────────────────────────────────────────────────────────────
-# deploy-web.sh — Build, upload, and invalidate the Pratham Cinema viewer.
+# deploy-web.sh — Build, upload, and invalidate the StreamVault web viewer.
 #
 # Usage:
 #   ./scripts/deploy-web.sh [bucket]
@@ -11,7 +11,7 @@
 #   ./scripts/deploy-web.sh my-other-bucket        # override the bucket
 #
 # Environment overrides:
-#   AWS_PROFILE           AWS credential profile (default: reactUser)
+#   AWS_PROFILE           AWS credential profile (loaded from .env)
 #   BUCKET                S3 bucket name         (default: your-s3-bucket-name)
 #   DISTRIBUTION_ID       CloudFront dist ID     (read from stack-outputs.json)
 #   SKIP_BUILD            set to 1 to skip the build step
@@ -59,7 +59,7 @@ fi
 
 echo ""
 echo "╔══════════════════════════════════════════════════════════════╗"
-echo "║              Pratham Cinema — Web Deployment                ║"
+echo "║              StreamVault — Web Deployment                   ║"
 echo "╚══════════════════════════════════════════════════════════════╝"
 echo ""
 echo "  Profile:       $AWS_PROFILE"

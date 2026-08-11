@@ -11,7 +11,7 @@ services:
       - ./backend/data:/app/data
     environment:
       - DATABASE_URL=sqlite:///./data/cinema.db
-      - JWT_SECRET=pratham-cinema-secure-key-1092
+      - JWT_SECRET=${JWT_SECRET:-change-me-before-first-run}
     restart: always
 
   frontend:

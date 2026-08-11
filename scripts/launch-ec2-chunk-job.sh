@@ -68,7 +68,7 @@ OUTPUT_PREFIX="${OUTPUT_PREFIX%/}"
 if ! aws s3api head-object --bucket "$BUCKET" --key "$INPUT_KEY" --region "$REGION" >/dev/null 2>&1; then
   echo "Input file not found: s3://$BUCKET/$INPUT_KEY"
   echo "Upload it first, for example:"
-  echo "  AWS_PROFILE=reactUser aws s3 cp input/video.mp4 s3://$BUCKET/$INPUT_KEY"
+  echo "  aws s3 cp input/video.mp4 s3://$BUCKET/$INPUT_KEY"
   exit 1
 fi
 

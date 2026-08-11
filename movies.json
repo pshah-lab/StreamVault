@@ -26,7 +26,7 @@
     "year": 2024,
     "hlsName": "mahavtar-narsimha",
     "outputPrefix": "output/mahavtar-narsimha",
-    "sourceFile": "input/www.5MovieRulz.clinic - Mahavatar Narsimha (2025) 1080p HQ WEB-DL - AVC - (DD+ 5.1 - 640kbps & AAC) [Tel + Tam + Hin + Mal + Kan] - 7.4GB - ESub.mkv",
+    "sourceFile": "input/mahavtar-narsimha.mkv",
     "multiAudio": true,
     "poster": "posters/mahavtar-narsimha.jpg"
   },
@@ -37,7 +37,7 @@
     "year": 2001,
     "hlsName": "harry-potter-sorcerers-stone",
     "outputPrefix": "output/harry-potter-sorcerers-stone",
-    "sourceFile": "input/Harry Potter and the Sorcerers Stone (2001) Dual Audio {HindiEnglish} 1080p BluRay 2.8GB ESub [BollYFlix].mkv",
+    "sourceFile": "input/harry-potter-sorcerers-stone.mkv",
     "multiAudio": true,
     "subtitles": true,
     "poster": "posters/harry-potter-sorcerers-stone.jpg"
@@ -49,7 +49,7 @@
     "year": 2009,
     "hlsName": "harry-potter-and-the-half-blood-prince",
     "outputPrefix": "output/harry-potter-and-the-half-blood-prince",
-    "sourceFile": "input/Harry Potter And The Half Blood Prince (2009) Dual Audio {HindiEnglish} 1080p BluRay 3GB ESub [BollYFlix].mkv",
+    "sourceFile": "input/harry-potter-and-the-half-blood-prince.mkv",
     "multiAudio": true,
     "subtitles": true,
     "poster": "posters/harry-potter-and-the-half-blood-prince.jpg"
@@ -61,7 +61,7 @@
     "year": 2002,
     "hlsName": "harry-potter-and-the-chamber-of-secrets",
     "outputPrefix": "output/harry-potter-and-the-chamber-of-secrets",
-    "sourceFile": "input/Harry Potter and the Chamber of Secrets (2002) Dual Audio {HindiEnglish} 1080p BluRay 3.1GB ESub [BollYFlix].mkv",
+    "sourceFile": "input/harry-potter-and-the-chamber-of-secrets.mkv",
     "multiAudio": true,
     "subtitles": true,
     "poster": "posters/harry-potter-and-the-chamber-of-secrets.jpg"
@@ -73,7 +73,7 @@
     "year": 2010,
     "hlsName": "harry-potter-and-the-deathly-hallows-part-1",
     "outputPrefix": "output/harry-potter-and-the-deathly-hallows-part-1",
-    "sourceFile": "input/Harry Potter and the Deathly Hallows Part 1 (2010) Dual Audio {HindiEnglish} 1080p BluRay 2.8GB ESub [BollYFlix].mkv",
+    "sourceFile": "input/harry-potter-and-the-deathly-hallows-part-1.mkv",
     "multiAudio": true,
     "subtitles": true,
     "poster": "posters/harry-potter-and-the-deathly-hallows-part-1.jpg"
@@ -85,7 +85,7 @@
     "year": 2011,
     "hlsName": "harry-potter-and-the-deathly-hallows-part-2",
     "outputPrefix": "output/harry-potter-and-the-deathly-hallows-part-2",
-    "sourceFile": "input/Harry Potter and the Deathly Hallows Part 2 (2011) Dual Audio {HindiEnglish} 1080p BluRay 2.6GB ESub [BollYFlix].mkv",
+    "sourceFile": "input/harry-potter-and-the-deathly-hallows-part-2.mkv",
     "multiAudio": true,
     "subtitles": true,
     "poster": "posters/harry-potter-and-the-deathly-hallows-part-2.jpg"
@@ -97,7 +97,7 @@
     "year": 2005,
     "hlsName": "harry-potter-and-the-goblet-of-fire",
     "outputPrefix": "output/harry-potter-and-the-goblet-of-fire",
-    "sourceFile": "input/Harry Potter and the Goblet of Fire (2005) Dual Audio {HindiEnglish} 1080p BluRay 3GB ESub [BollYFlix].mkv",
+    "sourceFile": "input/harry-potter-and-the-goblet-of-fire.mkv",
     "multiAudio": true,
     "subtitles": true,
     "poster": "posters/harry-potter-and-the-goblet-of-fire.jpg"
@@ -109,7 +109,7 @@
     "year": 2007,
     "hlsName": "harry-potter-and-the-order-of-the-phoenix",
     "outputPrefix": "output/harry-potter-and-the-order-of-the-phoenix",
-    "sourceFile": "input/Harry Potter and the Order of the Phoenix (2007) Dual Audio {HindiEnglish} 1080p BluRay 2.6GB ESub [BollYFlix].mkv",
+    "sourceFile": "input/harry-potter-and-the-order-of-the-phoenix.mkv",
     "multiAudio": true,
     "subtitles": true,
     "poster": "posters/harry-potter-and-the-order-of-the-phoenix.jpg"
@@ -121,7 +121,7 @@
     "year": 2026,
     "hlsName": "voicemails-for-isabelle",
     "outputPrefix": "output/voicemails-for-isabelle",
-    "sourceFile": "input/Voicemails for Isabelle 2026 1080p NF WEB-DL DDP5 1 Atmos H 264-FLUX.mkv",
+    "sourceFile": "input/voicemails-for-isabelle.mkv",
     "multiAudio": true,
     "subtitles": true,
     "poster": "posters/voicemails-for-isabelle.jpg"
@@ -133,7 +133,7 @@
     "year": 2004,
     "hlsName": "harry-potter-and-the-prisoner-of-azkaban",
     "outputPrefix": "output/harry-potter-and-the-prisoner-of-azkaban",
-    "sourceFile": "input/Harry Potter and the Prisoner of Azkaban (2004) Dual Audio {HindiEnglish} 1080p BluRay 2.8GB ESub.mkv",
+    "sourceFile": "input/harry-potter-and-the-prisoner-of-azkaban.mkv",
     "multiAudio": true,
     "subtitles": true,
     "poster": "posters/harry-potter-and-the-prisoner-of-azkaban.jpg"
@@ -145,7 +145,7 @@
     "year": 2017,
     "hlsName": "gifted",
     "outputPrefix": "output/gifted",
-    "sourceFile": "input/Gifted.2017.1080p.BluRay.x264.VPPV.mkv",
+    "sourceFile": "input/gifted.mkv",
     "multiAudio": false,
     "subtitles": false,
     "poster": "posters/gifted.jpg"
