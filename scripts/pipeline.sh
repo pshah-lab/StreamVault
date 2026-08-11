@@ -559,6 +559,10 @@ except Exception as e:
     print(f'     ⚠️ Poster fetch note: {e}')
 " || true
 
+      SAFE_FILENAME="$(node -e "process.stdout.write(JSON.stringify('input/$filename'))")"
+      SAFE_TITLE="$(node -e "process.stdout.write(JSON.stringify('${BATCH_TITLES_ARR[$idx]}'))")"
+      SAFE_SUBTITLE="$(node -e "process.stdout.write(JSON.stringify('${BATCH_SUBTITLES_ARR[$idx]}'))")"
+
       node -e "
         const fs = require('fs');
         const catalog = JSON.parse(fs.readFileSync('$CATALOG', 'utf8'));
@@ -570,12 +574,12 @@ except Exception as e:
 
         catalog.push({
           id: '${BATCH_IDS_ARR[$idx]}',
-          title: $(node -e "process.stdout.write(JSON.stringify('${BATCH_TITLES_ARR[$idx]}'))"),
-          subtitle: $(node -e "process.stdout.write(JSON.stringify('${BATCH_SUBTITLES_ARR[$idx]}'))"),
+          title: $SAFE_TITLE,
+          subtitle: $SAFE_SUBTITLE,
           year: ${BATCH_YEARS_ARR[$idx]},
           hlsName: '${BATCH_HLS_NAMES[$idx]}',
           outputPrefix: '$output_prefix',
-          sourceFile: 'input/$filename',
+          sourceFile: $SAFE_FILENAME,
           multiAudio: ${BATCH_MULTI_AUDIOS_ARR[$idx]},
           subtitles: ${BATCH_SUBTITLES_ENABLED_ARR[$idx]},
           poster: 'posters/${BATCH_HLS_NAMES[$idx]}.jpg'
