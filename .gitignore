@@ -12,6 +12,11 @@ cdk.context.json
 output/
 stack-outputs.json
 
+# Local logs & data
+console_log_2.txt
+*.log
+backend/data/
+
 # Internal documentation containing environment-specific AWS Account IDs & CloudFront IDs
 infra/import/README.md
 docs/

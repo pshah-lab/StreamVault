@@ -12,7 +12,7 @@ if [[ -f "$PROJECT_ROOT/.env" ]]; then
 fi
 
 BUCKET="${BUCKET:-your-s3-bucket-name}"
-REGION="${AWS_REGION:-ap-south-1}"
+REGION="${AWS_REGION:-us-east-1}"
 CATALOG="movies.json"
 
 read -rp "Local video file path: " VIDEO_PATH

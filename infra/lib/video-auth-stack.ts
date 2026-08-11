@@ -40,7 +40,7 @@ export class VideoAuthStack extends cdk.Stack {
     });
 
     const userPool = new cognito.UserPool(this, "ViewerUserPool", {
-      userPoolName: "pratham-hls-viewers",
+      userPoolName: `${this.stackName}-viewers`,
       selfSignUpEnabled: false,
       signInAliases: { email: true },
       autoVerify: { email: true },
@@ -50,7 +50,7 @@ export class VideoAuthStack extends cdk.Stack {
     });
 
     const userPoolClient = userPool.addClient("HostedUiClient", {
-      userPoolClientName: "pratham-hls-hosted-ui",
+      userPoolClientName: `${this.stackName}-hosted-ui`,
       generateSecret: false,
       oAuth: {
         flows: { authorizationCodeGrant: true },
@@ -70,25 +70,25 @@ export class VideoAuthStack extends cdk.Stack {
     });
 
     const signingKeySecret = new secretsmanager.CfnSecret(this, "CloudFrontSigningPrivateKey", {
-      name: "hls-video-viewer/cloudfront-signing-key",
+      name: `${this.stackName}/cloudfront-signing-key`,
       description: "Replace privateKey before enabling the CloudFront trusted key group.",
       secretString: JSON.stringify({ privateKey: "REPLACE_BEFORE_FIRST_LOGIN" }),
     });
     const stateSecret = new secretsmanager.Secret(this, "AuthStateSecret", {
-      secretName: "hls-video-viewer/auth-state",
+      secretName: `${this.stackName}/auth-state`,
       generateSecretString: { secretStringTemplate: "{}", generateStringKey: "stateSecret", excludePunctuation: true },
     });
 
     const publicKey = new cloudfront.CfnPublicKey(this, "ViewerSigningPublicKey", {
       publicKeyConfig: {
         callerReference: `${this.stackName}-viewer-signing-key`,
-        name: "pratham-hls-viewer-signing-key",
+        name: `${this.stackName}-signing-key`,
         encodedKey: cloudFrontPublicKeyPem.valueAsString,
       },
     });
     const keyGroup = new cloudfront.CfnKeyGroup(this, "ViewerSigningKeyGroup", {
       keyGroupConfig: {
-        name: "pratham-hls-viewers",
+        name: `${this.stackName}-key-group`,
         items: [publicKey.ref],
       },
     });
@@ -179,13 +179,13 @@ export class VideoAuthStack extends cdk.Stack {
     });
 
     const authApi = new apigwv2.HttpApi(this, "AuthApi", {
-      apiName: "pratham-hls-auth",
+      apiName: `${this.stackName}-auth-api`,
       createDefaultStage: true,
     });
     authApi.addRoutes({ path: "/auth/{proxy+}", methods: [apigwv2.HttpMethod.GET], integration: new apigwv2Integrations.HttpLambdaIntegration("AuthIntegration", authHandler) });
 
     const playbackTable = new dynamodb.Table(this, "PlaybackProgressTable", {
-      tableName: "PrathamCinemaPlayback",
+      tableName: `${this.stackName}PlaybackProgress`,
       partitionKey: { name: "user_id", type: dynamodb.AttributeType.STRING },
       sortKey: { name: "movie_id", type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,

@@ -7,7 +7,7 @@ const app = new cdk.App();
 new VideoAuthStack(app, "VideoAuthStack", {
   env: {
     account: process.env.CDK_DEFAULT_ACCOUNT,
-    region: process.env.CDK_DEFAULT_REGION || "ap-south-1",
+    region: process.env.AWS_REGION || process.env.CDK_DEFAULT_REGION || "us-east-1",
   },
   description: "Cognito authentication and signed-cookie controls for the HLS viewer.",
 });

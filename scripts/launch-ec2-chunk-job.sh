@@ -18,7 +18,7 @@ if [[ -f "$PROJECT_ROOT/.env" ]]; then
   set +o allexport
 fi
 
-REGION="${AWS_REGION:-ap-south-1}"
+REGION="${AWS_REGION:-us-east-1}"
 INSTANCE_TYPE="${EC2_INSTANCE_TYPE:-c7i.2xlarge}"
 INSTANCE_PROFILE_NAME="${EC2_INSTANCE_PROFILE_NAME:-hls-video-chunker-ec2-worker}"
 DISTRIBUTION_ID="${CLOUDFRONT_DISTRIBUTION_ID:-}"
