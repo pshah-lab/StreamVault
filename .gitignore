@@ -12,6 +12,27 @@ cdk.context.json
 output/
 stack-outputs.json
 
+# OS & System files
+.DS_Store
+Thumbs.db
+
+# Python & Virtual Environments
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+ENV/
+env/
+
+# Video Input Media
+input/
+
+# Temporary & Audit files
+index.js
+security_audit.md
+
 # Local logs & data
 console_log_2.txt
 *.log
