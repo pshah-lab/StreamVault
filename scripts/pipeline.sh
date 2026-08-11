@@ -594,11 +594,15 @@ for (( batch_start=0; batch_start<NUM_VIDEOS; batch_start+=BATCH_SIZE )); do
 
       # Fetch official theatrical poster from internet
       echo "  🖼  Fetching official theatrical poster for ${BATCH_TITLES_ARR[$idx]}..."
+      FETCH_TITLE="${BATCH_TITLES_ARR[$idx]}" \
+      FETCH_HLS_NAME="${BATCH_HLS_NAMES[$idx]}" \
+      PROJECT_ROOT="$PROJECT_ROOT" \
       python3 -c "
 import urllib.request, urllib.parse, json, os
-title = '''${BATCH_TITLES_ARR[$idx]}'''
-hls_name = '${BATCH_HLS_NAMES[$idx]}'
-poster_path = f'$PROJECT_ROOT/web/public/posters/{hls_name}.jpg'
+title = os.environ['FETCH_TITLE']
+hls_name = os.environ['FETCH_HLS_NAME']
+project_root = os.environ['PROJECT_ROOT']
+poster_path = f'{project_root}/web/public/posters/{hls_name}.jpg'
 os.makedirs(os.path.dirname(poster_path), exist_ok=True)
 url = f'https://www.omdbapi.com/?t={urllib.parse.quote(title)}&apikey=trilogy'
 try:
@@ -615,35 +619,32 @@ except Exception as e:
     print(f'     ⚠️ Poster fetch note: {e}')
 " || true
 
-      SAFE_FILENAME="$(node -e "process.stdout.write(JSON.stringify('input/$filename'))")"
-      SAFE_TITLE="$(node -e "process.stdout.write(JSON.stringify('${BATCH_TITLES_ARR[$idx]}'))")"
-      SAFE_SUBTITLE="$(node -e "process.stdout.write(JSON.stringify('${BATCH_SUBTITLES_ARR[$idx]}'))")"
+      node -e '
+        const fs = require("fs");
+        const [catalogPath, id, title, subtitle, yearStr, hlsName, outputPrefix, sourceFile, multiAudioStr, subtitlesStr] = process.argv.slice(1);
+        const catalog = JSON.parse(fs.readFileSync(catalogPath, "utf8"));
 
-      node -e "
-        const fs = require('fs');
-        const catalog = JSON.parse(fs.readFileSync('$CATALOG', 'utf8'));
-
-        if (catalog.some(m => m.id === '${BATCH_IDS_ARR[$idx]}')) {
-          console.log('  ⏭  ${BATCH_IDS_ARR[$idx]} already in catalog');
+        if (catalog.some(m => m.id === id)) {
+          console.log(`  ⏭  ${id} already in catalog`);
           process.exit(0);
         }
 
         catalog.push({
-          id: '${BATCH_IDS_ARR[$idx]}',
-          title: $SAFE_TITLE,
-          subtitle: $SAFE_SUBTITLE,
-          year: ${BATCH_YEARS_ARR[$idx]},
-          hlsName: '${BATCH_HLS_NAMES[$idx]}',
-          outputPrefix: '$output_prefix',
-          sourceFile: $SAFE_FILENAME,
-          multiAudio: ${BATCH_MULTI_AUDIOS_ARR[$idx]},
-          subtitles: ${BATCH_SUBTITLES_ENABLED_ARR[$idx]},
-          poster: 'posters/${BATCH_HLS_NAMES[$idx]}.jpg'
+          id,
+          title,
+          subtitle,
+          year: parseInt(yearStr, 10) || 2024,
+          hlsName,
+          outputPrefix,
+          sourceFile,
+          multiAudio: multiAudioStr === "true",
+          subtitles: subtitlesStr === "true",
+          poster: `posters/${hlsName}.jpg`
         });
 
-        fs.writeFileSync('$CATALOG', JSON.stringify(catalog, null, 2) + '\n');
-        console.log('  ✅ Added ${BATCH_IDS_ARR[$idx]} to movies.json');
-      "
+        fs.writeFileSync(catalogPath, JSON.stringify(catalog, null, 2) + "\n");
+        console.log(`  ✅ Added ${id} to movies.json`);
+      ' "$CATALOG" "${BATCH_IDS_ARR[$idx]}" "${BATCH_TITLES_ARR[$idx]}" "${BATCH_SUBTITLES_ARR[$idx]}" "${BATCH_YEARS_ARR[$idx]}" "${BATCH_HLS_NAMES[$idx]}" "$output_prefix" "input/$filename" "${BATCH_MULTI_AUDIOS_ARR[$idx]}" "${BATCH_SUBTITLES_ENABLED_ARR[$idx]}"
     done
     echo ""
 
