@@ -406,6 +406,45 @@ for (( batch_start=0; batch_start<NUM_VIDEOS; batch_start+=BATCH_SIZE )); do
     BATCH_MULTI_AUDIOS_ARR+=("${VIDEO_MULTI_AUDIOS[$i]}")
     BATCH_SUBTITLES_ENABLED_ARR+=("${VIDEO_SUBTITLES_ENABLED[$i]}")
 
+    # Check if HLS output already exists on S3 (video already chunked)
+    existing_playlist="$output_prefix/$hls_name.m3u8"
+    existing_master="$output_prefix/master.m3u8"
+    hls_already_exists=false
+
+    if aws s3api head-object --bucket "$BUCKET" --key "$existing_playlist" --region "$REGION" >/dev/null 2>&1; then
+      hls_already_exists=true
+    elif aws s3api head-object --bucket "$BUCKET" --key "$existing_master" --region "$REGION" >/dev/null 2>&1; then
+      hls_already_exists=true
+    fi
+
+    if [[ "$hls_already_exists" == "true" ]]; then
+      echo "  ✅ HLS output already exists for $hls_name on S3. Skipping upload & EC2 launch."
+      BATCH_INSTANCE_IDS+=("ALREADY_DONE")
+      echo ""
+      continue
+    fi
+
+    # Upload source video to S3 if not already there
+    s3_key="input/$filename"
+    if [[ -f "$video_path" ]]; then
+      local_size=$(stat -f%z "$video_path" 2>/dev/null || stat -c%s "$video_path" 2>/dev/null || echo 0)
+      s3_size=$(aws s3api head-object --bucket "$BUCKET" --key "$s3_key" --region "$REGION" --query "ContentLength" --output text 2>/dev/null || echo 0)
+      if [[ "$s3_size" == "$local_size" && "$local_size" -gt 0 ]]; then
+        echo "  ⏭  $filename already in S3 ($local_size bytes). Skipping upload."
+      else
+        echo "  📤 Uploading $filename → s3://$BUCKET/$s3_key ..."
+        aws s3 cp "$video_path" "s3://$BUCKET/$s3_key" --region "$REGION"
+        echo "     ✅ Uploaded"
+      fi
+    else
+      # S3-only flow — verify input exists
+      if ! aws s3api head-object --bucket "$BUCKET" --key "$s3_key" --region "$REGION" >/dev/null 2>&1; then
+        echo "  ❌ $filename missing locally and not in S3!"
+        exit 1
+      fi
+      echo "  ⏭  $filename exists in S3 (local file not present)."
+    fi
+
     # Check if an EC2 worker is already running for this video
     EXISTING_INSTANCE_ID="$(aws ec2 describe-instances \
       --region "$REGION" \
@@ -441,59 +480,70 @@ for (( batch_start=0; batch_start<NUM_VIDEOS; batch_start+=BATCH_SIZE )); do
   done
 
   # ── Wait for batch EC2 instances to finish ──
-  echo "━━━ Waiting for batch workers to complete ━━━"
-  echo ""
-  echo "  Polling every ${EC2_POLL_INTERVAL}s (timeout: ${EC2_TIMEOUT_MINUTES}m)"
-  echo "  Workers self-terminate after chunking + uploading."
-  echo ""
-  
-  MAX_POLLS=$(( EC2_TIMEOUT_MINUTES * 60 / EC2_POLL_INTERVAL ))
-  PENDING_IDS=("${BATCH_INSTANCE_IDS[@]}")
-
-  for (( poll=1; poll<=MAX_POLLS; poll++ )); do
-    STILL_RUNNING=()
-
-    for instance_id in "${PENDING_IDS[@]}"; do
-      STATE="$(aws ec2 describe-instances \
-        --region "$REGION" \
-        --instance-ids "$instance_id" \
-        --query "Reservations[0].Instances[0].State.Name" \
-        --output text 2>/dev/null || echo "unknown")"
-
-      if [[ "$STATE" == "terminated" || "$STATE" == "shutting-down" ]]; then
-        HLS_INDEX=""
-        for j in "${!BATCH_INSTANCE_IDS[@]}"; do
-          if [[ "${BATCH_INSTANCE_IDS[$j]}" == "$instance_id" ]]; then
-            HLS_INDEX="$j"
-            break
-          fi
-        done
-        hls_name="${BATCH_HLS_NAMES[$HLS_INDEX]}"
-        echo "  ✅ $instance_id ($hls_name) — $STATE"
-      elif [[ "$STATE" == "running" || "$STATE" == "pending" ]]; then
-        STILL_RUNNING+=("$instance_id")
-      else
-        echo "  ⚠️  $instance_id — unexpected state: $STATE"
-        STILL_RUNNING+=("$instance_id")
-      fi
-    done
-
-    if [[ ${#STILL_RUNNING[@]} -eq 0 ]]; then
-      echo ""
-      echo "  All workers in this batch have finished!"
-      break
+  PENDING_IDS=()
+  for id in "${BATCH_INSTANCE_IDS[@]}"; do
+    if [[ "$id" != "ALREADY_DONE" ]]; then
+      PENDING_IDS+=("$id")
     fi
-
-    PENDING_IDS=("${STILL_RUNNING[@]}")
-    echo "  ⏳ ${#STILL_RUNNING[@]} worker(s) still running... (poll $poll/$MAX_POLLS)"
-    sleep "$EC2_POLL_INTERVAL"
   done
 
-  if [[ ${#STILL_RUNNING[@]:-0} -gt 0 ]]; then
+  if [[ ${#PENDING_IDS[@]} -gt 0 ]]; then
+    echo "━━━ Waiting for batch workers to complete ━━━"
     echo ""
-    echo "  ⚠️  Timeout reached. ${#STILL_RUNNING[@]} worker(s) may still be running."
+    echo "  Polling every ${EC2_POLL_INTERVAL}s (timeout: ${EC2_TIMEOUT_MINUTES}m)"
+    echo "  Workers self-terminate after chunking + uploading."
+    echo ""
+    
+    MAX_POLLS=$(( EC2_TIMEOUT_MINUTES * 60 / EC2_POLL_INTERVAL ))
+
+    for (( poll=1; poll<=MAX_POLLS; poll++ )); do
+      STILL_RUNNING=()
+
+      for instance_id in "${PENDING_IDS[@]}"; do
+        STATE="$(aws ec2 describe-instances \
+          --region "$REGION" \
+          --instance-ids "$instance_id" \
+          --query "Reservations[0].Instances[0].State.Name" \
+          --output text 2>/dev/null || echo "unknown")"
+
+        if [[ "$STATE" == "terminated" || "$STATE" == "shutting-down" ]]; then
+          HLS_INDEX=""
+          for j in "${!BATCH_INSTANCE_IDS[@]}"; do
+            if [[ "${BATCH_INSTANCE_IDS[$j]}" == "$instance_id" ]]; then
+              HLS_INDEX="$j"
+              break
+            fi
+          done
+          hls_name="${BATCH_HLS_NAMES[$HLS_INDEX]}"
+          echo "  ✅ $instance_id ($hls_name) — $STATE"
+        elif [[ "$STATE" == "running" || "$STATE" == "pending" ]]; then
+          STILL_RUNNING+=("$instance_id")
+        else
+          echo "  ⚠️  $instance_id — unexpected state: $STATE"
+          STILL_RUNNING+=("$instance_id")
+        fi
+      done
+
+      if [[ ${#STILL_RUNNING[@]} -eq 0 ]]; then
+        echo ""
+        echo "  All workers in this batch have finished!"
+        break
+      fi
+
+      PENDING_IDS=("${STILL_RUNNING[@]}")
+      echo "  ⏳ ${#STILL_RUNNING[@]} worker(s) still running... (poll $poll/$MAX_POLLS)"
+      sleep "$EC2_POLL_INTERVAL"
+    done
+
+    if [[ ${#STILL_RUNNING[@]:-0} -gt 0 ]]; then
+      echo ""
+      echo "  ⚠️  Timeout reached. ${#STILL_RUNNING[@]} worker(s) may still be running."
+    fi
+    echo ""
+  else
+    echo "━━━ EC2 workers skipped (HLS output already exists on S3) ━━━"
+    echo ""
   fi
-  echo ""
 
   # ── Verify batch HLS outputs ──
   echo "━━━ Verifying HLS output for this batch ━━━"
@@ -504,9 +554,13 @@ for (( batch_start=0; batch_start<NUM_VIDEOS; batch_start+=BATCH_SIZE )); do
     hls_name="${BATCH_HLS_NAMES[$idx]}"
     output_prefix="$OUTPUT_BASE/$hls_name"
     playlist_key="$output_prefix/$hls_name.m3u8"
+    master_key="$output_prefix/master.m3u8"
 
     if aws s3api head-object --bucket "$BUCKET" --key "$playlist_key" --region "$REGION" >/dev/null 2>&1; then
       echo "  ✅ s3://$BUCKET/$playlist_key"
+      VERIFIED_COUNT=$((VERIFIED_COUNT + 1))
+    elif aws s3api head-object --bucket "$BUCKET" --key "$master_key" --region "$REGION" >/dev/null 2>&1; then
+      echo "  ✅ s3://$BUCKET/$master_key"
       VERIFIED_COUNT=$((VERIFIED_COUNT + 1))
     else
       echo "  ❌ s3://$BUCKET/$playlist_key — NOT FOUND"
@@ -525,9 +579,11 @@ for (( batch_start=0; batch_start<NUM_VIDEOS; batch_start+=BATCH_SIZE )); do
       filename="${BATCH_FILENAMES[$idx]}"
       output_prefix="$OUTPUT_BASE/$hls_name"
       playlist_key="$output_prefix/$hls_name.m3u8"
+      master_key="$output_prefix/master.m3u8"
 
-      # Only add if the playlist was verified
-      if ! aws s3api head-object --bucket "$BUCKET" --key "$playlist_key" --region "$REGION" >/dev/null 2>&1; then
+      # Only add if playlist or master playlist was verified
+      if ! aws s3api head-object --bucket "$BUCKET" --key "$playlist_key" --region "$REGION" >/dev/null 2>&1 && \
+         ! aws s3api head-object --bucket "$BUCKET" --key "$master_key" --region "$REGION" >/dev/null 2>&1; then
         echo "  ⏭  Skipping $hls_name (playlist not found)"
         continue
       fi
