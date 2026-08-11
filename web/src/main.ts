@@ -193,6 +193,7 @@ function resetPlayer() {
   activeHls = undefined;
   video.removeAttribute("src");
   video.load();
+  hideAccessError();
   audioPickerEl.hidden = true;
   audioMenuEl.hidden = true;
   audioPickerBtnEl.setAttribute("aria-expanded", "false");
@@ -211,6 +212,9 @@ function showAccessError(detail = "Session expired", titleText = "Playback inter
 function hideAccessError() {
   errorPanel.hidden = true;
 }
+
+video.addEventListener("play", () => hideAccessError());
+video.addEventListener("playing", () => hideAccessError());
 
 // ── Language utilities & Audio/Subtitle Track UI ──
 function getLanguageName(langCode: string): string {
