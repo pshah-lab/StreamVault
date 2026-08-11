@@ -330,6 +330,99 @@ function setupHlsSubtitles(hls: Hls) {
   }
 }
 
+function setupNativeAudioTracks(mediaEl: HTMLVideoElement) {
+  const audioTracks = (mediaEl as any).audioTracks;
+  if (!audioTracks || audioTracks.length === 0) {
+    audioPickerEl.hidden = true;
+    audioPickerEl.style.display = "none";
+    return;
+  }
+
+  audioPickerEl.hidden = false;
+  audioPickerEl.style.display = "block";
+  audioMenuEl.innerHTML = "";
+
+  let selectedIdx = 0;
+  for (let i = 0; i < audioTracks.length; i++) {
+    if (audioTracks[i].enabled) selectedIdx = i;
+  }
+
+  const currentTrack = audioTracks[selectedIdx] || audioTracks[0];
+  audioCurrentEl.textContent = getLanguageName(currentTrack.language || currentTrack.label || "Default Audio");
+
+  for (let i = 0; i < audioTracks.length; i++) {
+    const track = audioTracks[i];
+    const li = document.createElement("li");
+    li.className = "audio-picker-item";
+    if (i === selectedIdx) li.classList.add("is-selected");
+    li.textContent = getLanguageName(track.language || track.label || `Track ${i + 1}`);
+    li.setAttribute("role", "option");
+    li.addEventListener("click", (e) => {
+      e.stopPropagation();
+      for (let j = 0; j < audioTracks.length; j++) {
+        audioTracks[j].enabled = (j === i);
+      }
+      audioCurrentEl.textContent = getLanguageName(track.language || track.label || `Track ${i + 1}`);
+      audioMenuEl.hidden = true;
+      audioMenuEl.style.display = "none";
+      audioPickerBtnEl.setAttribute("aria-expanded", "false");
+
+      audioMenuEl.querySelectorAll(".audio-picker-item").forEach((item, idx) => {
+        item.classList.toggle("is-selected", idx === i);
+      });
+    });
+    audioMenuEl.appendChild(li);
+  }
+}
+
+function setupNativeSubtitles(mediaEl: HTMLVideoElement) {
+  const textTracks = mediaEl.textTracks;
+  if (!textTracks || textTracks.length === 0) {
+    subtitlePickerEl.hidden = true;
+    subtitlePickerEl.style.display = "none";
+    return;
+  }
+
+  subtitlePickerEl.hidden = false;
+  subtitlePickerEl.style.display = "block";
+  subtitleMenuEl.innerHTML = "";
+
+  const offLi = document.createElement("li");
+  offLi.className = "subtitle-picker-item";
+  offLi.textContent = "Off";
+  offLi.setAttribute("role", "option");
+  offLi.addEventListener("click", (e) => {
+    e.stopPropagation();
+    for (let j = 0; j < textTracks.length; j++) {
+      textTracks[j].mode = "disabled";
+    }
+    subtitleCurrentEl.textContent = "Subtitles: Off";
+    subtitleMenuEl.hidden = true;
+    subtitleMenuEl.style.display = "none";
+    subtitlePickerBtnEl.setAttribute("aria-expanded", "false");
+  });
+  subtitleMenuEl.appendChild(offLi);
+
+  for (let i = 0; i < textTracks.length; i++) {
+    const track = textTracks[i];
+    const li = document.createElement("li");
+    li.className = "subtitle-picker-item";
+    li.textContent = getLanguageName(track.language || track.label || `Subtitle ${i + 1}`);
+    li.setAttribute("role", "option");
+    li.addEventListener("click", (e) => {
+      e.stopPropagation();
+      for (let j = 0; j < textTracks.length; j++) {
+        textTracks[j].mode = (j === i) ? "showing" : "disabled";
+      }
+      subtitleCurrentEl.textContent = `Subtitles: ${getLanguageName(track.language || track.label)}`;
+      subtitleMenuEl.hidden = true;
+      subtitleMenuEl.style.display = "none";
+      subtitlePickerBtnEl.setAttribute("aria-expanded", "false");
+    });
+    subtitleMenuEl.appendChild(li);
+  }
+}
+
 // ── Continue Watching Rail ──
 function formatTime(totalSeconds: number): string {
   const m = Math.floor(totalSeconds / 60);
@@ -708,6 +801,13 @@ document.addEventListener("click", () => {
   subtitleMenuEl.hidden = true;
   subtitleMenuEl.style.display = "none";
   subtitlePickerBtnEl.setAttribute("aria-expanded", "false");
+});
+
+video.addEventListener("loadedmetadata", () => {
+  if (!activeHls) {
+    setupNativeAudioTracks(video);
+    setupNativeSubtitles(video);
+  }
 });
 
 void init();
