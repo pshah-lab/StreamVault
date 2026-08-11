@@ -489,14 +489,14 @@ body.player-open {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  transition: transform 0.5s ease, filter 0.5s ease;
-  filter: brightness(0.65) contrast(1.05);
+  transition: transform 0.5s ease, filter 0.5s ease, opacity 0.5s ease;
+  filter: brightness(0.9) contrast(1.05);
 }
 
 .movie-select:hover .movie-card-bg,
 .continue-card:hover .movie-card-bg {
-  transform: scale(1.08);
-  filter: brightness(0.82) contrast(1.1);
+  transform: scale(1.06);
+  filter: brightness(1.0) contrast(1.1);
 }
 
 .continue-card-top {
@@ -599,7 +599,7 @@ body.player-open {
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: linear-gradient(180deg, rgba(8, 9, 12, 0.1) 0%, rgba(8, 9, 12, 0.88) 80%);
+  background: linear-gradient(180deg, rgba(8, 9, 12, 0.05) 0%, rgba(8, 9, 12, 0.75) 85%);
 }
 
 .movie-select:hover, .movie-select:focus-visible {
