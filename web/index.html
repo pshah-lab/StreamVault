@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#08090c" />
+    <title>Private Cinema</title>
+  </head>
+  <body>
+    <main class="cinema-shell">
+      <header class="topbar">
+        <a class="wordmark" href="/app/index.html" aria-label="Private Cinema home">Private <span>Cinema</span></a>
+        <a id="logout" class="text-action" href="/auth/logout">Sign out</a>
+      </header>
+
+      <section id="continue-watching-section" class="continue-watching" aria-labelledby="continue-title" hidden>
+        <div class="section-header">
+          <p class="eyebrow">In progress</p>
+          <h2 id="continue-title">Continue Watching</h2>
+        </div>
+        <div id="continue-watching-rail" class="continue-rail" role="list" aria-label="In progress movies">
+          <!-- Dynamically populated -->
+        </div>
+      </section>
+
+      <section class="library" aria-labelledby="library-title">
+        <div class="library-header">
+          <div>
+            <p class="eyebrow">Now streaming</p>
+            <h2 id="library-title">Choose your movie</h2>
+          </div>
+          <div class="search-box">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="search" id="movie-search" placeholder="Search title, year, keyword..." aria-label="Search movies" autocomplete="off" />
+          </div>
+        </div>
+
+        <div id="no-search-results" class="no-search-results" hidden>
+          <p class="no-results-title">No movies found</p>
+          <p class="no-results-detail">Try searching for a different title, subtitle, or release year.</p>
+        </div>
+
+        <div class="movie-rail" role="list" aria-label="Available movies">
+          <!-- Movie cards are rendered dynamically from movies.json -->
+        </div>
+      </section>
+
+      <div id="player-backdrop" class="player-backdrop"></div>
+
+      <section id="expanded-player" class="player-stage" aria-labelledby="title" aria-modal="true" role="dialog">
+        <button id="close-player" class="close-player" type="button" aria-label="Close player">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+        <div class="player-inner">
+          <div class="player-video-wrapper">
+            <video id="player" controls playsinline preload="metadata" aria-label="Movie Player"></video>
+
+            <div id="player-error" class="player-error" hidden>
+              <strong id="player-error-title">Playback could not continue.</strong>
+              <span id="player-error-detail" class="player-error-detail">A stream diagnostic will appear here.</span>
+              <a href="/auth/login">Sign in again</a>
+            </div>
+          </div>
+          <div class="player-meta">
+            <div id="movie-eyebrow" class="eyebrow">FEATURE PRESENTATION</div>
+            <div class="player-meta-title-row">
+              <h1 id="title">Movie Title</h1>
+              <div class="player-meta-pickers">
+                <div class="audio-picker" id="audio-picker" hidden>
+                  <button class="audio-picker-btn" id="audio-picker-btn" type="button" aria-haspopup="listbox" aria-expanded="false">
+                    <span class="audio-icon">🔊</span>
+                    <span id="audio-current">Audio</span>
+                  </button>
+                  <ul class="audio-picker-menu" id="audio-menu" role="listbox" hidden>
+                    <!-- Populated dynamically -->
+                  </ul>
+                </div>
+
+                <div class="subtitle-picker" id="subtitle-picker" hidden>
+                  <button class="subtitle-picker-btn" id="subtitle-picker-btn" type="button" aria-haspopup="listbox" aria-expanded="false">
+                    <span class="subtitle-icon">💬</span>
+                    <span id="subtitle-current">Subtitles</span>
+                  </button>
+                  <ul class="subtitle-picker-menu" id="subtitle-menu" role="listbox" hidden>
+                    <!-- Populated dynamically -->
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <p class="summary">A private HLS screening secured by your viewer session.</p>
+          </div>
+        </div>
+      </section>
+
+      <footer>
+        <span>Secure HLS streaming</span>
+        <span id="session-state">Checking session…</span>
+      </footer>
+    </main>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

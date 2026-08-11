@@ -130,7 +130,7 @@ export async function handler(event: APIGatewayProxyEventV2): Promise<APIGateway
     if (event.rawPath === "/auth/logout") return logout();
     return {
       statusCode: 404,
-      headers: SECURITY_HEADERS,
+      headers: getSecurityHeaders(),
       body: JSON.stringify({ error: "Not found" })
     };
   } catch (error) {
