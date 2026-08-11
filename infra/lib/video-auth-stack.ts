@@ -56,7 +56,10 @@ export class VideoAuthStack extends cdk.Stack {
         flows: { authorizationCodeGrant: true },
         scopes: [cognito.OAuthScope.OPENID, cognito.OAuthScope.EMAIL, cognito.OAuthScope.PROFILE],
         callbackUrls: [cdk.Fn.join("", ["https://", viewerDomain.valueAsString, "/auth/callback"])],
-        logoutUrls: [cdk.Fn.join("", ["https://", viewerDomain.valueAsString, "/app/index.html"])],
+        logoutUrls: [
+          cdk.Fn.join("", ["https://", viewerDomain.valueAsString, "/app/login.html"]),
+          cdk.Fn.join("", ["https://", viewerDomain.valueAsString, "/app/index.html"]),
+        ],
       },
       preventUserExistenceErrors: true,
     });
