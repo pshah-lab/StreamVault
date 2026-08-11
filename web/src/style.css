@@ -872,6 +872,11 @@ footer {
   position: relative;
 }
 
+.audio-picker[hidden], .subtitle-picker[hidden],
+.audio-picker-menu[hidden], .subtitle-picker-menu[hidden] {
+  display: none !important;
+}
+
 .audio-picker-btn, .subtitle-picker-btn {
   display: inline-flex;
   align-items: center;
