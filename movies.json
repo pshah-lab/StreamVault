@@ -149,29 +149,5 @@
     "multiAudio": false,
     "subtitles": false,
     "poster": "posters/gifted.jpg"
-  },
-  {
-    "id": "friends-s03e02-the-one-where-no-one-s-ready",
-    "title": "Friends",
-    "subtitle": "The One Where No One's Ready",
-    "year": 1996,
-    "hlsName": "friends-s03e02-the-one-where-no-one-s-ready",
-    "outputPrefix": "output/friends-s03e02-the-one-where-no-one-s-ready",
-    "sourceFile": "input/Friends.S03E02.The.One.Where.No.One's.Ready.720p.BluRay.2CH.x265.HEVC-PSA.mkv",
-    "multiAudio": true,
-    "subtitles": true,
-    "poster": "posters/friends-s03e02-the-one-where-no-one-s-ready.jpg"
-  },
-  {
-    "id": "friends-s03e19-the-one-with-the-tiny-t-shirt",
-    "title": "Friends",
-    "subtitle": "The One with the Tiny T-Shirt",
-    "year": 1997,
-    "hlsName": "friends-s03e19-the-one-with-the-tiny-t-shirt",
-    "outputPrefix": "output/friends-s03e19-the-one-with-the-tiny-t-shirt",
-    "sourceFile": "input/Friends.S03E19.The.One.with.the.Tiny.T-Shirt.720p.BluRay.2CH.x265.HEVC-PSA.mkv",
-    "multiAudio": true,
-    "subtitles": true,
-    "poster": "posters/friends-s03e19-the-one-with-the-tiny-t-shirt.jpg"
   }
 ]
