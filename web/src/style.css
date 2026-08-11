@@ -13,7 +13,34 @@ body.player-open { overflow: hidden; }
 /* ── Continue Watching Section ───────────────── */
 .continue-watching { width: min(100%, 1180px); margin: 20px auto 0; animation: enter .7s ease-out both; }
 .continue-watching h2 { margin: 0 0 20px; font: 600 clamp(24px, 3.5vw, 36px)/1 "Playfair Display", Georgia, serif; letter-spacing: -.03em; }
-.continue-rail { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: clamp(14px, 2.5vw, 24px); }
+.continue-rail {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: clamp(14px, 2.5vw, 24px);
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 14px;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(191, 142, 99, .5) rgba(255, 255, 255, .04);
+}
+.continue-rail::-webkit-scrollbar {
+  height: 8px;
+}
+.continue-rail::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, .04);
+  border-radius: 4px;
+}
+.continue-rail::-webkit-scrollbar-thumb {
+  background: rgba(191, 142, 99, .45);
+  border-radius: 4px;
+  transition: background .2s ease;
+}
+.continue-rail::-webkit-scrollbar-thumb:hover {
+  background: rgba(191, 142, 99, .85);
+}
 
 .movie-card-bg {
   position: absolute;
@@ -32,6 +59,7 @@ body.player-open { overflow: hidden; }
 }
 
 .continue-card {
+  flex: 0 0 clamp(240px, 28vw, 300px);
   position: relative;
   display: flex;
   flex-direction: column;
