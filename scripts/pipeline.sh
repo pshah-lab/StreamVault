@@ -619,6 +619,9 @@ except Exception as e:
     print(f'     ⚠️ Poster fetch note: {e}')
 " || true
 
+      # Convert poster to 16:10 landscape key-art card
+      python3 "$PROJECT_ROOT/scripts/make_landscape_posters.py" >/dev/null 2>&1 || true
+
       # Auto-detect if master.m3u8 exists on S3
       has_master=false
       if aws s3api head-object --bucket "$BUCKET" --key "$output_prefix/master.m3u8" --region "$REGION" >/dev/null 2>&1; then
