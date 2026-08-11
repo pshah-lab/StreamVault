@@ -71,7 +71,8 @@ echo ""
 if [[ "${SKIP_BUILD:-}" == "1" ]]; then
   echo "⏭  Skipping build (SKIP_BUILD=1)"
 else
-  echo "🔨 Building web app..."
+  echo "🔨 Copying catalog & building web app..."
+  cp -f movies.json web/public/movies.json
   pnpm build:web
   echo "   ✅ Build complete"
 fi

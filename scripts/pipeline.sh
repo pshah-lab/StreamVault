@@ -619,6 +619,19 @@ except Exception as e:
     print(f'     ⚠️ Poster fetch note: {e}')
 " || true
 
+      # Auto-detect if master.m3u8 exists on S3
+      has_master=false
+      if aws s3api head-object --bucket "$BUCKET" --key "$output_prefix/master.m3u8" --region "$REGION" >/dev/null 2>&1; then
+        has_master=true
+      fi
+
+      multi_audio_arg="${BATCH_MULTI_AUDIOS_ARR[$idx]}"
+      subtitles_arg="${BATCH_SUBTITLES_ENABLED_ARR[$idx]}"
+      if [[ "$has_master" == "true" ]]; then
+        multi_audio_arg="true"
+        subtitles_arg="true"
+      fi
+
       node -e '
         const fs = require("fs");
         const [catalogPath, id, title, subtitle, yearStr, hlsName, outputPrefix, sourceFile, multiAudioStr, subtitlesStr] = process.argv.slice(1);
@@ -644,7 +657,7 @@ except Exception as e:
 
         fs.writeFileSync(catalogPath, JSON.stringify(catalog, null, 2) + "\n");
         console.log(`  ✅ Added ${id} to movies.json`);
-      ' "$CATALOG" "${BATCH_IDS_ARR[$idx]}" "${BATCH_TITLES_ARR[$idx]}" "${BATCH_SUBTITLES_ARR[$idx]}" "${BATCH_YEARS_ARR[$idx]}" "${BATCH_HLS_NAMES[$idx]}" "$output_prefix" "input/$filename" "${BATCH_MULTI_AUDIOS_ARR[$idx]}" "${BATCH_SUBTITLES_ENABLED_ARR[$idx]}"
+      ' "$CATALOG" "${BATCH_IDS_ARR[$idx]}" "${BATCH_TITLES_ARR[$idx]}" "${BATCH_SUBTITLES_ARR[$idx]}" "${BATCH_YEARS_ARR[$idx]}" "${BATCH_HLS_NAMES[$idx]}" "$output_prefix" "input/$filename" "$multi_audio_arg" "$subtitles_arg"
     done
     echo ""
 
