@@ -204,6 +204,7 @@ function resetPlayer() {
 
 function showAccessError(detail = "Session expired", titleText = "Playback interrupted") {
   errorPanel.hidden = false;
+  errorPanel.style.display = "flex";
   errorTitle.textContent = titleText;
   errorDetail.textContent = detail;
   sessionState.textContent = "Session expired";
@@ -211,6 +212,7 @@ function showAccessError(detail = "Session expired", titleText = "Playback inter
 
 function hideAccessError() {
   errorPanel.hidden = true;
+  errorPanel.style.display = "none";
 }
 
 video.addEventListener("play", () => hideAccessError());
