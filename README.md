@@ -27,14 +27,14 @@ graph TD
     DynamoDB["AWS DynamoDB"]
     EC2Worker["EC2 Worker Instance (FFmpeg Chunking)"]
 
-    Client -->|1. Sign In Redirect| Cognito
-    Cognito -->|2. Auth Code Callback| LambdaAuth
-    LambdaAuth -->|3. Issue Signed Cookies| Client
-    Client -->|4. Request HLS Stream| CF
-    CF -->|5. Validate Signed Cookies & Serve Content| S3_VOD
-    Client -->|6. Sync Playback State| API
-    API -->|7. Persist Position| DynamoDB
-    EC2Worker -->|HLS Transcode & Upload| S3_VOD
+    Client -->|"1. Sign In Redirect"| Cognito
+    Cognito -->|"2. Auth Code Callback"| LambdaAuth
+    LambdaAuth -->|"3. Issue Signed Cookies"| Client
+    Client -->|"4. Request HLS Stream"| CF
+    CF -->|"5. Validate Signed Cookies & Serve Content"| S3_VOD
+    Client -->|"6. Sync Playback State"| API
+    API -->|"7. Persist Position"| DynamoDB
+    EC2Worker -->|"HLS Transcode & Upload"| S3_VOD
 ```
 
 ---
