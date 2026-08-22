@@ -1,6 +1,9 @@
-fastapi>=0.110.0
-uvicorn>=0.28.0
-boto3>=1.34.0
-python-jose[cryptography]>=3.3.0
-pydantic>=2.6.0
-python-multipart>=0.0.9
+fastapi==0.115.12
+uvicorn==0.34.3
+boto3==1.39.2
+python-jose[cryptography]==3.4.0
+pydantic==2.11.7
+python-multipart==0.0.20
+# NOTE: Python 3.9 limits starlette to <1.0 and python-multipart to <=0.0.20
+# Upgrade to Python 3.11+ in production to get latest security patches for these packages.
+# The Dockerfile already uses python:3.11-slim which will pull the latest compatible versions.

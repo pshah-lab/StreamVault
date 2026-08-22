@@ -1,15 +1,46 @@
+import logging
 import os
+import re
 import datetime
 from decimal import Decimal
 from typing import List
+
 import boto3
 from boto3.dynamodb.conditions import Key
-from fastapi import FastAPI, Depends, HTTPException, Header, status
+from fastapi import FastAPI, Depends, HTTPException, Header, Path, Request, Response, status
 from fastapi.middleware.cors import CORSMiddleware
-from jose import jwt as jose_jwt
-from pydantic import BaseModel
+from jose import jwt as jose_jwt, ExpiredSignatureError, JWTError
+from pydantic import BaseModel, field_validator
+from starlette.middleware.base import BaseHTTPMiddleware
+
+logger = logging.getLogger("uvicorn.error")
 
 app = FastAPI(title="Pratham Cinema API")
+
+# ── Security Headers Middleware ──
+
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    """Inject hardened security headers on every response."""
+
+    async def dispatch(self, request: Request, call_next):
+        response: Response = await call_next(request)
+        response.headers["Content-Security-Policy"] = (
+            "default-src 'self'; "
+            "script-src 'self'; "
+            "style-src 'self' 'unsafe-inline'; "
+            "img-src 'self' data: https:; "
+            "font-src 'self'; "
+            "connect-src 'self' http://localhost:8000; "
+            "frame-ancestors 'none'"
+        )
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["Strict-Transport-Security"] = "max-age=63072000; includeSubDomains; preload"
+        response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+        return response
+
+app.add_middleware(SecurityHeadersMiddleware)
 
 # ── DynamoDB Client Setup ──
 
@@ -41,9 +72,18 @@ app.add_middleware(
 
 # ── Pydantic Schemas ──
 
+MOVIE_ID_PATTERN = re.compile(r"^[a-zA-Z0-9_-]+$")
+
 class ProgressUpdate(BaseModel):
     movie_id: str
     seconds: float
+
+    @field_validator("movie_id")
+    @classmethod
+    def validate_movie_id(cls, v: str) -> str:
+        if not MOVIE_ID_PATTERN.match(v):
+            raise ValueError("movie_id contains invalid characters")
+        return v
 
 class ProgressResponse(BaseModel):
     movie_id: str
@@ -55,18 +95,30 @@ class ProgressResponse(BaseModel):
 def get_current_user(
     authorization: str = Header(None)
 ) -> str:
+    """Verify JWT and return user identifier. Rejects unauthenticated requests with 401."""
     if not authorization or not authorization.startswith("Bearer "):
-        return "default_viewer"
-        
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing token")
     token = authorization.split(" ")[1]
-    if not token or token in ("null", "undefined"):
-        return "default_viewer"
+    if not token:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Empty token")
+
+    secret = os.getenv("JWT_SECRET")
+    if not secret:
+        logger.error("JWT_SECRET environment variable is not configured")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="JWT secret not configured")
 
     try:
-        claims = jose_jwt.get_unverified_claims(token)
-        return claims.get("sub") or claims.get("email") or "default_viewer"
-    except Exception:
-        return "default_viewer"
+        claims = jose_jwt.decode(token, secret, algorithms=["HS256"])
+    except ExpiredSignatureError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token expired")
+    except JWTError as e:
+        logger.warning(f"JWT verification failed: {e}")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+
+    user_id = claims.get("sub") or claims.get("email")
+    if not user_id:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token missing user identity")
+    return user_id
 
 # ── Endpoints ──
 
@@ -92,7 +144,7 @@ def save_progress(
 
 @app.get("/api/progress/{movie_id}")
 def get_progress(
-    movie_id: str,
+    movie_id: str = Path(..., pattern=r"^[a-zA-Z0-9_-]+$"),
     user_id: str = Depends(get_current_user)
 ):
     try:

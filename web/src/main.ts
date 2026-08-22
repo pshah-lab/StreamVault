@@ -51,6 +51,13 @@ const CARD_PALETTES = [
   { glow: "rgba(145, 200, 255, .36)", grad1: "#0d1219", grad2: "#183a5a", grad3: "#19110d", accent: "#6396bf" },
 ];
 
+// ── HTML Escape Helper (XSS Prevention) ──
+function escapeHtml(str: string): string {
+  const div = document.createElement("div");
+  div.textContent = str;
+  return div.innerHTML;
+}
+
 function catalogToMovie(entry: CatalogEntry, index: number): Movie {
   const playlistName = (entry.multiAudio || entry.subtitles) ? "master.m3u8" : `${entry.hlsName}.m3u8`;
   return {
@@ -113,7 +120,9 @@ function renderHeroSpotlight(movie: Movie) {
   heroSubtitle.textContent = movie.rawSubtitle || "Stream Vault Presentation";
   heroYearTag.textContent = movie.year.toString();
   if (movie.poster && heroBg) {
-    heroBg.style.backgroundImage = `url('${movie.poster}')`;
+    // Sanitise poster URL: only allow http(s) and relative paths
+    const safe = movie.poster.replace(/["'<>]/g, "");
+    heroBg.style.backgroundImage = `url('${safe}')`;
   }
 }
 
@@ -147,12 +156,16 @@ function renderMovieCards(): HTMLElement[] {
     article.style.setProperty("--card-grad3", palette.grad3);
     article.style.setProperty("--card-accent", palette.accent);
 
+    const safeTitle = escapeHtml(entry.title);
+    const safeSubtitle = entry.subtitle ? escapeHtml(entry.subtitle) : "";
+    const safePoster = movie.poster ? movie.poster.replace(/["'<>]/g, "") : "";
+
     article.innerHTML = `
-      <button class="movie-select" type="button" aria-label="Play ${movie.posterLabel}">
-        ${movie.poster ? `<div class="movie-card-bg" style="background-image: url('${movie.poster}')"></div>` : ""}
-        <span class="poster-meta">${entry.year}</span>
-        <strong>${entry.title}</strong>
-        ${entry.subtitle ? `<em>${entry.subtitle}</em>` : ""}
+      <button class="movie-select" type="button" aria-label="Play ${escapeHtml(movie.posterLabel)}">
+        ${safePoster ? `<div class="movie-card-bg" style="background-image: url('${safePoster}')"></div>` : ""}
+        <span class="poster-meta">${escapeHtml(String(entry.year))}</span>
+        <strong>${safeTitle}</strong>
+        ${safeSubtitle ? `<em>${safeSubtitle}</em>` : ""}
         <span class="play-pill">Play</span>
       </button>
     `;
@@ -452,11 +465,15 @@ function renderContinueWatching() {
 
     const estimatedPercent = Math.min(95, Math.max(5, Math.round((savedTime / 7200) * 100)));
 
+    const safePoster = movie.poster ? movie.poster.replace(/["'<>]/g, "") : "";
+    const safeRawTitle = escapeHtml(movie.rawTitle);
+    const safeRawSubtitle = movie.rawSubtitle ? escapeHtml(movie.rawSubtitle) : "";
+
     card.innerHTML = `
-      ${movie.poster ? `<div class="movie-card-bg" style="background-image: url('${movie.poster}')"></div>` : ""}
+      ${safePoster ? `<div class="movie-card-bg" style="background-image: url('${safePoster}')"></div>` : ""}
       <div class="continue-card-top">
-        <h3 class="continue-card-title">${movie.rawTitle}</h3>
-        ${movie.rawSubtitle ? `<p class="continue-card-subtitle">${movie.rawSubtitle}</p>` : ""}
+        <h3 class="continue-card-title">${safeRawTitle}</h3>
+        ${safeRawSubtitle ? `<p class="continue-card-subtitle">${safeRawSubtitle}</p>` : ""}
       </div>
       <div class="continue-card-bottom">
         <div class="resume-badge">
@@ -521,7 +538,15 @@ video.addEventListener("timeupdate", () => {
 async function loadPlayer(movie: Movie) {
   resetPlayer();
 
-  title.innerHTML = movie.titleHtml;
+  // Safe title rendering – no innerHTML with unsanitised data
+  title.textContent = "";
+  title.textContent = movie.rawTitle;
+  if (movie.rawSubtitle) {
+    title.appendChild(document.createElement("br"));
+    const subtitleEl = document.createElement("em");
+    subtitleEl.textContent = movie.rawSubtitle;
+    title.appendChild(subtitleEl);
+  }
   eyebrowEl.textContent = movie.eyebrow;
 
   let startSeconds = 0;

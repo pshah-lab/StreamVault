@@ -41,3 +41,7 @@ backend/data/
 # Internal documentation containing environment-specific AWS Account IDs & CloudFront IDs
 infra/import/README.md
 docs/
+
+# Ignore all .md files except root README.md
+*.md
+!/README.md
