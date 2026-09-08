@@ -5,7 +5,6 @@ import * as apigwv2Integrations from "aws-cdk-lib/aws-apigatewayv2-integrations"
 import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
 import * as cognito from "aws-cdk-lib/aws-cognito";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
-import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as lambdaNodejs from "aws-cdk-lib/aws-lambda-nodejs";
@@ -18,39 +17,59 @@ export class VideoAuthStack extends cdk.Stack {
 
     const viewerDomain = new cdk.CfnParameter(this, "ViewerDomain", {
       type: "String",
+      default: process.env.VIEWER_DOMAIN,
       description: "Existing CloudFront distribution domain used for callbacks and signed-cookie scope.",
     });
     const cognitoDomainPrefix = new cdk.CfnParameter(this, "CognitoDomainPrefix", {
       type: "String",
-      description: "Globally unique Cognito Hosted UI domain prefix, for example hls-viewer-prefix-123456789012.",
+      default: process.env.COGNITO_DOMAIN_PREFIX,
+      description: "Globally unique Cognito Hosted UI domain prefix.",
     });
     const cloudFrontPublicKeyPem = new cdk.CfnParameter(this, "CloudFrontPublicKeyPem", {
       type: "String",
+      default: (process.env.CLOUDFRONT_PUBLIC_KEY_PEM || "").replace(/\\n/g, "\n"),
       description: "PEM public key paired with the private key stored in Secrets Manager.",
     });
     const s3BucketName = new cdk.CfnParameter(this, "S3BucketName", {
       type: "String",
-      default: "video-chunker-assets",
+      default: process.env.BUCKET || process.env.S3_BUCKET_NAME,
       description: "Name of the S3 bucket storing input raw videos and HLS output playlists.",
     });
     const existingDistributionId = new cdk.CfnParameter(this, "ExistingDistributionId", {
       type: "String",
-      default: "E1234567890ABC",
+      default: process.env.DISTRIBUTION_ID,
       description: "Existing CloudFront Distribution ID.",
     });
 
+    // ── Media bucket security hardening (CWE-16) ──
+    // CDK cannot retroactively set BlockPublicAccess, default encryption (SSE-S3/KMS),
+    // ObjectOwnership, or OAC-only access on an imported bucket. Those settings MUST be
+    // configured on the bucket itself (via console, CLI, or a dedicated hardening stack).
+    //
+    // Additionally, the CDK execution role does not have s3:PutBucketPolicy on the
+    // existing bucket, so the TLS-only policy must be applied directly:
+    //
+    //   aws s3api put-bucket-policy --bucket <BUCKET_NAME> --policy file://bucket-tls-policy.json
+    //
+    // Operator checklist for the imported bucket:
+    //   - Block Public Access: all four settings enabled
+    //   - Default encryption: SSE-S3 or SSE-KMS with bucket key
+    //   - Object Ownership: BucketOwnerEnforced (disables ACLs)
+    //   - CloudFront OAC: only the distribution should have read access
+    //   - Bucket policy: deny aws:SecureTransport=false (TLS-only)
+
     const userPool = new cognito.UserPool(this, "ViewerUserPool", {
-      userPoolName: `${this.stackName}-viewers`,
+      userPoolName: "pratham-hls-viewers",
       selfSignUpEnabled: false,
       signInAliases: { email: true },
       autoVerify: { email: true },
       accountRecovery: cognito.AccountRecovery.EMAIL_ONLY,
       passwordPolicy: { minLength: 12, requireDigits: true, requireLowercase: true, requireUppercase: true, requireSymbols: true },
-      removalPolicy: cdk.RemovalPolicy.RETAIN,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
     const userPoolClient = userPool.addClient("HostedUiClient", {
-      userPoolClientName: `${this.stackName}-hosted-ui`,
+      userPoolClientName: "pratham-hls-hosted-ui",
       generateSecret: false,
       oAuth: {
         flows: { authorizationCodeGrant: true },
@@ -70,25 +89,25 @@ export class VideoAuthStack extends cdk.Stack {
     });
 
     const signingKeySecret = new secretsmanager.CfnSecret(this, "CloudFrontSigningPrivateKey", {
-      name: `${this.stackName}/cloudfront-signing-key`,
+      name: "hls-video-viewer/cloudfront-signing-key",
       description: "Replace privateKey before enabling the CloudFront trusted key group.",
       secretString: JSON.stringify({ privateKey: "REPLACE_BEFORE_FIRST_LOGIN" }),
     });
     const stateSecret = new secretsmanager.Secret(this, "AuthStateSecret", {
-      secretName: `${this.stackName}/auth-state`,
+      secretName: "hls-video-viewer/auth-state",
       generateSecretString: { secretStringTemplate: "{}", generateStringKey: "stateSecret", excludePunctuation: true },
     });
 
     const publicKey = new cloudfront.CfnPublicKey(this, "ViewerSigningPublicKey", {
       publicKeyConfig: {
         callerReference: `${this.stackName}-viewer-signing-key`,
-        name: `${this.stackName}-signing-key`,
+        name: "pratham-hls-viewer-signing-key",
         encodedKey: cloudFrontPublicKeyPem.valueAsString,
       },
     });
     const keyGroup = new cloudfront.CfnKeyGroup(this, "ViewerSigningKeyGroup", {
       keyGroupConfig: {
-        name: `${this.stackName}-key-group`,
+        name: "pratham-hls-viewers",
         items: [publicKey.ref],
       },
     });
@@ -115,23 +134,21 @@ export class VideoAuthStack extends cdk.Stack {
       resources: [signingKeySecret.ref, stateSecret.secretArn],
     }));
 
-    const ec2WorkerVpc = new ec2.Vpc(this, "Ec2ChunkWorkerVpc", {
-      vpcName: "hls-video-chunker-ec2-vpc",
-      maxAzs: 1,
-      natGateways: 0,
-      subnetConfiguration: [
-        {
-          name: "public",
-          subnetType: ec2.SubnetType.PUBLIC,
-          cidrMask: 24,
-        },
-      ],
+    // Import existing VPC networking resources (configured via environment variables)
+    const ec2WorkerVpcId = new cdk.CfnParameter(this, "Ec2WorkerVpcIdParam", {
+      type: "String",
+      default: process.env.VPC_ID || "",
+      description: "VPC ID for the EC2 chunk worker.",
     });
-    const ec2WorkerSecurityGroup = new ec2.SecurityGroup(this, "Ec2ChunkWorkerSecurityGroup", {
-      vpc: ec2WorkerVpc,
-      securityGroupName: "hls-video-chunker-ec2-worker",
-      description: "No inbound access; outbound only for one-shot HLS EC2 workers.",
-      allowAllOutbound: true,
+    const ec2WorkerSubnetId = new cdk.CfnParameter(this, "Ec2WorkerSubnetIdParam", {
+      type: "String",
+      default: process.env.Public_Subnet_ID || process.env.PUBLIC_SUBNET_ID || "",
+      description: "Public subnet ID for the EC2 chunk worker (must have internet access).",
+    });
+    const ec2WorkerSecurityGroupId = new cdk.CfnParameter(this, "Ec2WorkerSecurityGroupIdParam", {
+      type: "String",
+      default: process.env.Security_Group_ID || process.env.SECURITY_GROUP_ID || "",
+      description: "Security group ID for the EC2 chunk worker (outbound-only, no inbound).",
     });
 
     const ec2WorkerRole = new iam.Role(this, "Ec2ChunkWorkerRole", {
@@ -155,8 +172,10 @@ export class VideoAuthStack extends cdk.Stack {
         },
       },
     }));
+    // CWE-732: Workers only upload — DeleteObject removed to prevent
+    // a compromised worker from deleting other titles' output.
     ec2WorkerRole.addToPolicy(new iam.PolicyStatement({
-      actions: ["s3:PutObject", "s3:DeleteObject"],
+      actions: ["s3:PutObject"],
       resources: [`arn:aws:s3:::${s3BucketName.valueAsString}/output*/*`],
     }));
     ec2WorkerRole.addToPolicy(new iam.PolicyStatement({
@@ -179,24 +198,15 @@ export class VideoAuthStack extends cdk.Stack {
     });
 
     const authApi = new apigwv2.HttpApi(this, "AuthApi", {
-      apiName: `${this.stackName}-auth-api`,
+      apiName: "pratham-hls-auth",
       createDefaultStage: true,
     });
     authApi.addRoutes({ path: "/auth/{proxy+}", methods: [apigwv2.HttpMethod.GET], integration: new apigwv2Integrations.HttpLambdaIntegration("AuthIntegration", authHandler) });
 
-    const playbackTable = new dynamodb.Table(this, "PlaybackProgressTable", {
-      tableName: `${this.stackName}PlaybackProgress`,
-      partitionKey: { name: "user_id", type: dynamodb.AttributeType.STRING },
-      sortKey: { name: "movie_id", type: dynamodb.AttributeType.STRING },
-      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-      removalPolicy: cdk.RemovalPolicy.RETAIN,
-    });
-
-    playbackTable.addGlobalSecondaryIndex({
-      indexName: "UserUpdatedAtIndex",
-      partitionKey: { name: "user_id", type: dynamodb.AttributeType.STRING },
-      sortKey: { name: "updated_at", type: dynamodb.AttributeType.STRING },
-      projectionType: dynamodb.ProjectionType.ALL,
+    // Import existing DynamoDB table (configured via environment variable or default)
+    const playbackTable = dynamodb.Table.fromTableAttributes(this, "PlaybackProgressTable", {
+      tableName: process.env.DYNAMODB_TABLE_NAME || "PrathamCinemaPlayback",
+      globalIndexes: ["UserUpdatedAtIndex"],
     });
 
     new cdk.CfnOutput(this, "AuthApiDomain", { value: cdk.Fn.select(2, cdk.Fn.split("/", authApi.apiEndpoint)) });
@@ -207,8 +217,9 @@ export class VideoAuthStack extends cdk.Stack {
     new cdk.CfnOutput(this, "SigningKeySecretArn", { value: signingKeySecret.ref });
     new cdk.CfnOutput(this, "PlaybackTableName", { value: playbackTable.tableName });
     new cdk.CfnOutput(this, "Ec2WorkerInstanceProfileName", { value: "hls-video-chunker-ec2-worker" });
-    new cdk.CfnOutput(this, "Ec2WorkerSubnetId", { value: ec2WorkerVpc.publicSubnets[0].subnetId });
-    new cdk.CfnOutput(this, "Ec2WorkerSecurityGroupId", { value: ec2WorkerSecurityGroup.securityGroupId });
+    new cdk.CfnOutput(this, "Ec2WorkerVpcId", { value: ec2WorkerVpcId.valueAsString });
+    new cdk.CfnOutput(this, "Ec2WorkerSubnetId", { value: ec2WorkerSubnetId.valueAsString });
+    new cdk.CfnOutput(this, "Ec2WorkerSecurityGroupId", { value: ec2WorkerSecurityGroupId.valueAsString });
     new cdk.CfnOutput(this, "ExistingDistributionIdOutput", { value: existingDistributionId.valueAsString });
 
   }

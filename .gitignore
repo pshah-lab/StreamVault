@@ -45,3 +45,4 @@ docs/
 # Ignore all .md files except root README.md
 *.md
 !/README.md
+*.sarif

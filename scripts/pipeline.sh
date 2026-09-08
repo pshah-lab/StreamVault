@@ -62,6 +62,10 @@ else
   exit 1
 fi
 
+# Prefer Public_Subnet_ID / Security_Group_ID from .env if set
+EC2_SUBNET_ID="${EC2_SUBNET_ID:-${Public_Subnet_ID:-${PUBLIC_SUBNET_ID:-}}}"
+EC2_SECURITY_GROUP_ID="${EC2_SECURITY_GROUP_ID:-${Security_Group_ID:-${SECURITY_GROUP_ID:-}}}"
+
 # Fetch EC2 subnet and security group from CloudFormation stack outputs
 if [[ -z "${EC2_SUBNET_ID:-}" || -z "${EC2_SECURITY_GROUP_ID:-}" ]]; then
   echo "Fetching EC2 network config from CloudFormation..."

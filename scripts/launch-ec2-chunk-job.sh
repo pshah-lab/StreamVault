@@ -26,8 +26,9 @@ if [[ -z "$DISTRIBUTION_ID" && -f stack-outputs.json ]]; then
   DISTRIBUTION_ID="$(node -e 'try { const o=JSON.parse(require("fs").readFileSync("stack-outputs.json")); console.log(o.ExistingDistributionId || o.ExistingDistributionIdOutput || ""); } catch(e){}' 2>/dev/null || true)"
 fi
 AMI_PARAMETER="${EC2_AMI_PARAMETER:-/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64}"
-SUBNET_ID="${EC2_SUBNET_ID:-}"
-SECURITY_GROUP_ID="${EC2_SECURITY_GROUP_ID:-}"
+SUBNET_ID="${EC2_SUBNET_ID:-${Public_Subnet_ID:-${PUBLIC_SUBNET_ID:-}}}"
+SECURITY_GROUP_ID="${EC2_SECURITY_GROUP_ID:-${Security_Group_ID:-${SECURITY_GROUP_ID:-}}}"
+VPC_ID="${EC2_VPC_ID:-${VPC_ID:-}}"
 VOLUME_SIZE_GB="${EC2_VOLUME_SIZE_GB:-120}"
 
 if [[ -z "$BUCKET" || -z "$INPUT_KEY_OR_URI" || -z "$HLS_NAME" ]]; then
@@ -64,6 +65,20 @@ fi
 
 OUTPUT_PREFIX="${OUTPUT_PREFIX#/}"
 OUTPUT_PREFIX="${OUTPUT_PREFIX%/}"
+
+# ── Security: validate INPUT_KEY and OUTPUT_PREFIX (CWE-78) ──
+# Only allow characters safe for S3 keys AND shell interpolation.
+# Blocks shell metacharacters (`, $, ;, |, &, etc.) from reaching
+# the EC2 user-data heredoc where these values run as root.
+SAFE_S3_KEY_RE='^[a-zA-Z0-9._/-]+$'
+if [[ ! "$INPUT_KEY" =~ $SAFE_S3_KEY_RE ]]; then
+  echo "Error: INPUT_KEY contains unsafe characters: $INPUT_KEY"
+  exit 1
+fi
+if [[ ! "$OUTPUT_PREFIX" =~ $SAFE_S3_KEY_RE ]]; then
+  echo "Error: OUTPUT_PREFIX contains unsafe characters: $OUTPUT_PREFIX"
+  exit 1
+fi
 
 if ! aws s3api head-object --bucket "$BUCKET" --key "$INPUT_KEY" --region "$REGION" >/dev/null 2>&1; then
   echo "Input file not found: s3://$BUCKET/$INPUT_KEY"
@@ -120,10 +135,17 @@ fi
 
 finish() {
   local status="\$?"
+
+  # Persist worker log to S3 for post-mortem debugging (before instance terminates)
+  local log_key="\${OUTPUT_PREFIX}/\${HLS_NAME}/logs/hls-ec2-worker-\$(date +%Y%m%dT%H%M%S).log"
+  echo "Uploading worker log to s3://\$BUCKET/\$log_key ..."
+  aws s3 cp /var/log/hls-ec2-worker.log "s3://\$BUCKET/\$log_key" --region "\$REGION" 2>/dev/null || echo "Warning: failed to upload worker log to S3."
+
   if [[ "\$status" -eq 0 ]]; then
     echo "HLS EC2 job finished successfully."
   else
-    echo "HLS EC2 job failed with status \$status. Check /var/log/hls-ec2-worker.log."
+    echo "HLS EC2 job failed with status \$status."
+    echo "Log uploaded to s3://\$BUCKET/\$log_key"
   fi
 
   if [[ -n "\$INSTANCE_ID" ]]; then
