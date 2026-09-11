@@ -8,8 +8,9 @@
     <title>StreamVault — Enterprise Video Streaming</title>
   </head>
   <body>
+    <a class="skip-link" href="#library-title">Skip to library</a>
     <div class="cinema-shell">
-      <!-- Enterprise Top Navigation -->
+      <!-- Private cinema navigation -->
       <header class="topbar">
         <div class="brand-group">
           <a class="wordmark" href="/app/index.html" aria-label="StreamVault Home">
@@ -21,6 +22,12 @@
           <span class="badge-pro">ENTERPRISE HLS</span>
         </div>
 
+        <nav class="primary-nav" aria-label="Primary navigation">
+          <a href="#hero-spotlight">Spotlight</a>
+          <a href="#continue-watching-section">Continue</a>
+          <a href="#library-title">Library</a>
+        </nav>
+
         <div class="nav-center">
           <div class="search-box">
             <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -28,11 +35,14 @@
               <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
             </svg>
             <input type="search" id="movie-search" placeholder="Search title, year, audio, or keywords... (Ctrl+K)" aria-label="Search movies" autocomplete="off" />
+            <button id="clear-search" class="clear-search" type="button" aria-label="Clear search" hidden>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18"></line><line x1="18" y1="6" x2="6" y2="18"></line></svg>
+            </button>
           </div>
         </div>
 
         <div class="nav-actions">
-          <span id="session-state" class="session-pill">Checking session…</span>
+          <span id="session-state" class="session-pill" role="status" aria-live="polite">Checking session…</span>
           <a id="logout" class="btn-text-action" href="/auth/logout">Sign out</a>
         </div>
       </header>
@@ -42,6 +52,7 @@
         <div id="hero-bg" class="hero-bg"></div>
         <div class="hero-vignette"></div>
         <div class="hero-content">
+          <p class="hero-kicker">Private screening room <span aria-hidden="true">/</span> invited viewers</p>
           <div class="hero-badges">
             <span class="hero-tag featured-tag">FEATURED PRESENTATION</span>
             <span id="hero-year-tag" class="hero-tag">2024</span>
@@ -49,6 +60,7 @@
           </div>
           <h1 id="hero-title" class="hero-title">Featured Presentation</h1>
           <p id="hero-subtitle" class="hero-subtitle">Experience high-definition multi-track streaming</p>
+          <p class="hero-note"><span class="live-dot" aria-hidden="true"></span> Secure edge playback · resume anywhere</p>
           <div class="hero-actions">
             <button id="hero-play-btn" class="btn-primary" type="button">
               <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
@@ -79,8 +91,8 @@
       <section class="rail-section library" aria-labelledby="library-title">
         <div class="library-header">
           <div class="header-titles">
-            <span class="eyebrow">CATALOG LIBRARY</span>
-            <h2 id="library-title">Explore Cinema</h2>
+            <span class="eyebrow">THE COLLECTION</span>
+            <h2 id="library-title">Choose your next screening</h2>
           </div>
 
           <!-- Category Chips -->
@@ -130,7 +142,7 @@
     <!-- HLS Modal Player Stage -->
     <div id="player-backdrop" class="player-backdrop"></div>
 
-    <section id="expanded-player" class="player-stage" aria-labelledby="title" aria-modal="true" role="dialog">
+    <section id="expanded-player" class="player-stage" aria-labelledby="title" aria-describedby="player-summary" aria-modal="true" role="dialog" tabindex="-1">
       <button id="close-player" class="close-player" type="button" aria-label="Close player">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
@@ -150,8 +162,8 @@
             <h1 id="title">Movie Title</h1>
             <div class="player-meta-pickers">
               <div class="audio-picker" id="audio-picker" hidden>
-                <button class="audio-picker-btn" id="audio-picker-btn" type="button" aria-haspopup="listbox" aria-expanded="false">
-                  <span class="picker-icon">🔊</span>
+                <button class="audio-picker-btn" id="audio-picker-btn" type="button" aria-haspopup="listbox" aria-controls="audio-menu" aria-expanded="false">
+                  <span class="picker-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 9 9 9 14 5 14 19 9 15 5 15 5 9"></polygon><path d="M18 9.5a4 4 0 0 1 0 5"></path><path d="M20.5 7a8 8 0 0 1 0 10"></path></svg></span>
                   <span id="audio-current">Audio Track</span>
                 </button>
                 <ul class="audio-picker-menu" id="audio-menu" role="listbox" hidden>
@@ -160,8 +172,8 @@
               </div>
 
               <div class="subtitle-picker" id="subtitle-picker" hidden>
-                <button class="subtitle-picker-btn" id="subtitle-picker-btn" type="button" aria-haspopup="listbox" aria-expanded="false">
-                  <span class="picker-icon">💬</span>
+                <button class="subtitle-picker-btn" id="subtitle-picker-btn" type="button" aria-haspopup="listbox" aria-controls="subtitle-menu" aria-expanded="false">
+                  <span class="picker-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5H11l-4.5 4v-4.2A2.5 2.5 0 0 1 4 13.5z"></path><path d="M8 8.5h8M8 12h5"></path></svg></span>
                   <span id="subtitle-current">Subtitles</span>
                 </button>
                 <ul class="subtitle-picker-menu" id="subtitle-menu" role="listbox" hidden>
@@ -170,7 +182,7 @@
               </div>
             </div>
           </div>
-          <p class="summary">Encrypted HLS stream authenticated via AWS CloudFront Signed Cookies and Cognito.</p>
+          <p id="player-summary" class="summary">Private playback for invited viewers. Your session is protected while this window is open.</p>
         </div>
       </div>
     </section>

@@ -93,13 +93,20 @@ echo "📤 Uploading to s3://$BUCKET/app/ ..."
 # Hashed assets → immutable cache (1 year)
 aws s3 sync "$DIST_DIR" "s3://$BUCKET/app" \
   --exclude "index.html" \
+  --exclude "login.html" \
   --exclude "movies.json" \
   --cache-control "public, max-age=31536000, immutable"
 
-# index.html → no cache (always fetch latest)
+# HTML files → no cache (always fetch latest)
 aws s3 cp "$DIST_DIR/index.html" "s3://$BUCKET/app/index.html" \
   --content-type "text/html; charset=utf-8" \
   --cache-control "no-cache"
+
+if [[ -f "$DIST_DIR/login.html" ]]; then
+  aws s3 cp "$DIST_DIR/login.html" "s3://$BUCKET/app/login.html" \
+    --content-type "text/html; charset=utf-8" \
+    --cache-control "no-cache"
+fi
 
 # movies.json → no cache (always check for latest catalog)
 aws s3 cp "$DIST_DIR/movies.json" "s3://$BUCKET/app/movies.json" \

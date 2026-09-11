@@ -40,6 +40,7 @@ let activeMovie: Movie | undefined;
 let activeHls: Hls | undefined;
 let isPlayerOpen = false;
 let activeCategory = "all";
+let lastFocusedElement: HTMLElement | null = null;
 
 // ── Card Color Palette ──
 const CARD_PALETTES = [
@@ -92,6 +93,7 @@ const audioPickerEl = document.querySelector<HTMLElement>("#audio-picker")!;
 const audioPickerBtnEl = document.querySelector<HTMLButtonElement>("#audio-picker-btn")!;
 const audioCurrentEl = document.querySelector<HTMLElement>("#audio-current")!;
 const audioMenuEl = document.querySelector<HTMLElement>("#audio-menu")!;
+const clearSearchBtnEl = document.querySelector<HTMLButtonElement>("#clear-search")!;
 
 const subtitlePickerEl = document.querySelector<HTMLElement>("#subtitle-picker")!;
 const subtitlePickerBtnEl = document.querySelector<HTMLButtonElement>("#subtitle-picker-btn")!;
@@ -163,11 +165,15 @@ function renderMovieCards(): HTMLElement[] {
     article.innerHTML = `
       <button class="movie-select" type="button" aria-label="Play ${escapeHtml(movie.posterLabel)}">
         ${safePoster ? `<div class="movie-card-bg" style="background-image: url('${safePoster}')"></div>` : ""}
-        <span class="poster-meta">${escapeHtml(String(entry.year))}</span>
-        <strong>${safeTitle}</strong>
-        ${safeSubtitle ? `<em>${safeSubtitle}</em>` : ""}
         <span class="play-pill">Play</span>
       </button>
+      <div class="movie-card-info">
+        <div>
+          <strong>${safeTitle}</strong>
+          ${safeSubtitle ? `<em>${safeSubtitle}</em>` : ""}
+        </div>
+        <span class="movie-card-year">${escapeHtml(String(entry.year))}</span>
+      </div>
     `;
 
     article.querySelector(".movie-select")?.addEventListener("click", () => {
@@ -183,10 +189,12 @@ function renderMovieCards(): HTMLElement[] {
 
 // ── Player Open/Close ──
 function openPlayer() {
+  lastFocusedElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
   isPlayerOpen = true;
   document.body.classList.add("player-open");
   backdrop.classList.add("is-visible");
   expandedPlayer.classList.add("is-open");
+  expandedPlayer.focus({ preventScroll: true });
 }
 
 function closePlayer() {
@@ -199,6 +207,8 @@ function closePlayer() {
 
   resetPlayer();
   renderContinueWatching();
+  lastFocusedElement?.focus({ preventScroll: true });
+  lastFocusedElement = null;
 }
 
 function resetPlayer() {
@@ -263,6 +273,7 @@ function setupHlsAudioTracks(hls: Hls) {
       if (index === currentTrackIdx) li.classList.add("is-selected");
       li.textContent = getLanguageName(track.lang || track.name || `Track ${index + 1}`);
       li.setAttribute("role", "option");
+      li.setAttribute("aria-selected", String(index === currentTrackIdx));
       li.addEventListener("click", (e) => {
         e.stopPropagation();
         hls.audioTrack = index;
@@ -273,6 +284,7 @@ function setupHlsAudioTracks(hls: Hls) {
 
         audioMenuEl.querySelectorAll(".audio-picker-item").forEach((item, idx) => {
           item.classList.toggle("is-selected", idx === index);
+          item.setAttribute("aria-selected", String(idx === index));
         });
       });
       audioMenuEl.appendChild(li);
@@ -300,6 +312,7 @@ function setupHlsSubtitles(hls: Hls) {
     }
     offLi.textContent = "Off";
     offLi.setAttribute("role", "option");
+    offLi.setAttribute("aria-selected", String(hls.subtitleTrack === -1));
     offLi.addEventListener("click", (e) => {
       e.stopPropagation();
       hls.subtitleTrack = -1;
@@ -310,6 +323,7 @@ function setupHlsSubtitles(hls: Hls) {
 
       subtitleMenuEl.querySelectorAll(".subtitle-picker-item").forEach((item, idx) => {
         item.classList.toggle("is-selected", idx === 0);
+        item.setAttribute("aria-selected", String(idx === 0));
       });
     });
     subtitleMenuEl.appendChild(offLi);
@@ -323,6 +337,7 @@ function setupHlsSubtitles(hls: Hls) {
       }
       li.textContent = getLanguageName(track.lang || track.name);
       li.setAttribute("role", "option");
+      li.setAttribute("aria-selected", String(hls.subtitleTrack === index));
       li.addEventListener("click", (e) => {
         e.stopPropagation();
         hls.subtitleTrack = index;
@@ -333,6 +348,7 @@ function setupHlsSubtitles(hls: Hls) {
 
         subtitleMenuEl.querySelectorAll(".subtitle-picker-item").forEach((item, idx) => {
           item.classList.toggle("is-selected", idx === (index + 1));
+          item.setAttribute("aria-selected", String(idx === (index + 1)));
         });
       });
       subtitleMenuEl.appendChild(li);
@@ -370,6 +386,7 @@ function setupNativeAudioTracks(mediaEl: HTMLVideoElement) {
     if (i === selectedIdx) li.classList.add("is-selected");
     li.textContent = getLanguageName(track.language || track.label || `Track ${i + 1}`);
     li.setAttribute("role", "option");
+    li.setAttribute("aria-selected", String(i === selectedIdx));
     li.addEventListener("click", (e) => {
       e.stopPropagation();
       for (let j = 0; j < audioTracks.length; j++) {
@@ -382,6 +399,7 @@ function setupNativeAudioTracks(mediaEl: HTMLVideoElement) {
 
       audioMenuEl.querySelectorAll(".audio-picker-item").forEach((item, idx) => {
         item.classList.toggle("is-selected", idx === i);
+        item.setAttribute("aria-selected", String(idx === i));
       });
     });
     audioMenuEl.appendChild(li);
@@ -404,6 +422,7 @@ function setupNativeSubtitles(mediaEl: HTMLVideoElement) {
   offLi.className = "subtitle-picker-item";
   offLi.textContent = "Off";
   offLi.setAttribute("role", "option");
+  offLi.setAttribute("aria-selected", "true");
   offLi.addEventListener("click", (e) => {
     e.stopPropagation();
     for (let j = 0; j < textTracks.length; j++) {
@@ -422,6 +441,7 @@ function setupNativeSubtitles(mediaEl: HTMLVideoElement) {
     li.className = "subtitle-picker-item";
     li.textContent = getLanguageName(track.language || track.label || `Subtitle ${i + 1}`);
     li.setAttribute("role", "option");
+    li.setAttribute("aria-selected", "false");
     li.addEventListener("click", (e) => {
       e.stopPropagation();
       for (let j = 0; j < textTracks.length; j++) {
@@ -638,6 +658,7 @@ function filterMovies() {
   const searchInput = document.querySelector<HTMLInputElement>("#movie-search");
   const query = searchInput?.value.trim().toLowerCase() || "";
   const noResultsEl = document.querySelector<HTMLElement>("#no-search-results");
+  clearSearchBtnEl.hidden = !query;
 
   let visibleCount = 0;
 
@@ -693,6 +714,12 @@ function setupCategoryChips() {
 function setupSearch() {
   const searchInput = document.querySelector<HTMLInputElement>("#movie-search");
   searchInput?.addEventListener("input", filterMovies);
+  clearSearchBtnEl.addEventListener("click", () => {
+    if (!searchInput) return;
+    searchInput.value = "";
+    filterMovies();
+    searchInput.focus();
+  });
 }
 
 // ── Keyboard Shortcuts Handler ──

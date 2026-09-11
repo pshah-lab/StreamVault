@@ -8,6 +8,7 @@
     <title>StreamVault — Enterprise Sign In</title>
   </head>
   <body>
+    <a class="skip-link" href="#login-title">Skip to sign in</a>
     <div class="login-shell">
       <!-- Background Ambient Glow & Vignette -->
       <div class="login-bg"></div>
@@ -29,10 +30,10 @@
       <!-- Main Login Hero Card -->
       <main class="login-container">
         <div class="login-card">
-          <div class="card-badge">PRIVATE CINEMA ACCESS</div>
-          <h1 class="login-title">Sign in to your StreamVault account</h1>
+          <div class="card-badge">INVITATION ONLY</div>
+          <h1 id="login-title" class="login-title">Your private cinema, ready when you are.</h1>
           <p class="login-description">
-            Experience high-definition 4K multi-track streaming secured by AWS CloudFront Signed Cookies and Cognito authentication.
+            Sign in with your invited account to enter a secure screening room for Bahubali and the rest of your collection.
           </p>
 
           <!-- Primary Sign In Action -->
@@ -43,7 +44,7 @@
                 <polyline points="10 17 15 12 10 7"></polyline>
                 <line x1="15" y1="12" x2="3" y2="12"></line>
               </svg>
-              Sign In with Cognito
+              Enter the screening room
             </a>
           </div>
 
@@ -59,19 +60,19 @@
         <!-- Platform Feature Cards -->
         <div class="features-grid">
           <div class="feature-card">
-            <div class="feature-icon">🎬</div>
-            <h3>4K HLS Multi-Track</h3>
-            <p>Seamless multi-language audio switching and WebVTT subtitle renditions.</p>
+            <div class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="m10 9 5 3-5 3z"></path></svg></div>
+            <h3>One quiet room</h3>
+            <p>A focused player with resume points, multi-audio tracks, and subtitles.</p>
           </div>
           <div class="feature-card">
-            <div class="feature-icon">🛡️</div>
-            <h3>Signed Cookies</h3>
-            <p>Cryptographically signed viewing sessions preventing unauthorized hotlinking.</p>
+            <div class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 21s7-3.5 7-9V5l-7-2-7 2v7c0 5.5 7 9 7 9z"></path><path d="m9 12 2 2 4-4"></path></svg></div>
+            <h3>Invite-only by design</h3>
+            <p>Your session is protected at the edge and never exposes AWS credentials.</p>
           </div>
           <div class="feature-card">
-            <div class="feature-icon">⚡</div>
-            <h3>Edge CDN Accelerated</h3>
-            <p>Ultra-low latency adaptive bitrate streaming powered by AWS CloudFront.</p>
+            <div class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M13 2 4 14h7l-1 8 9-12h-7z"></path></svg></div>
+            <h3>Ready at the edge</h3>
+            <p>Fast adaptive playback delivered through a global CDN.</p>
           </div>
         </div>
       </main>

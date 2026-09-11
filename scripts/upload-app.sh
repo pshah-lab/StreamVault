@@ -24,9 +24,15 @@ fi
 
 aws s3 sync "$DIST_DIR" "s3://$BUCKET/app" \
   --exclude "index.html" \
+  --exclude "login.html" \
   --cache-control "public, max-age=31536000, immutable"
 aws s3 cp "$DIST_DIR/index.html" "s3://$BUCKET/app/index.html" \
   --content-type "text/html; charset=utf-8" \
   --cache-control "no-cache"
+if [[ -f "$DIST_DIR/login.html" ]]; then
+  aws s3 cp "$DIST_DIR/login.html" "s3://$BUCKET/app/login.html" \
+    --content-type "text/html; charset=utf-8" \
+    --cache-control "no-cache"
+fi
 
 echo "Viewer uploaded to s3://$BUCKET/app/"

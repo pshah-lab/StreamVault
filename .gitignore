@@ -45,6 +45,7 @@ docs/
 # Ignore all .md files except root README.md
 *.md
 !/README.md
-!/CHANGELOG.md
-!/CHANGELOG_LAST_24_HOURS.md
+!/DESIGN.md
+
+
 *.sarif
